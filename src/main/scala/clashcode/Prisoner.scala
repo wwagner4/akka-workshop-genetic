@@ -11,7 +11,9 @@ class Prisoner(name: String) extends Actor {
   remoteActor ! Hello(name)
 
   def receive = {
-    case _ : NameRequest => sender ! name
+    case _ : NameRequest =>
+      //println("asked for name")
+      sender ! Hello(name)
     case PrisonerRequest(other) => sender ! PrisonerResponse(true)
     case x => println(x)
   }
