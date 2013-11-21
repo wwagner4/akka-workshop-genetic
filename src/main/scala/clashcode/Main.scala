@@ -11,7 +11,7 @@ object Main extends App {
     val system = ActorSystem("cluster")
     system.actorOf(Props(classOf[Prisoner], "PrisonerA"), "player")
     system.actorOf(Props(classOf[Prisoner], "PrisonerB"), "prisonerB")
-    system.actorOf(Props(classOf[Prisoner], "PrisonerC"), "player2")
+    system.actorOf(Props(classOf[Prisoner], "PrisonerC"), "PrisonerC")
 
     val router = system.actorOf(Props.empty.withRouter(
       ClusterRouterConfig(

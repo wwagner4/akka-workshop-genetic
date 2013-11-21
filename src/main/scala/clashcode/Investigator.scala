@@ -23,7 +23,7 @@ class Investigator(router: ActorRef) extends Actor {
   def receive = {
     case "now" =>
 
-      val name1 = (router ? NameRequest()).map {
+      val name1 = (router ? NameRequest).map {
         case Hello(name) =>
           println(name)
           name
