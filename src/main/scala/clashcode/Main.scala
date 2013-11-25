@@ -3,15 +3,32 @@ package clashcode
 import akka.actor.{Props, ActorSystem}
 import akka.routing.{RandomRouter, ConsistentHashingRouter, FromConfig}
 import akka.cluster.routing.{ClusterRouterSettings, ClusterRouterConfig}
+import clashcode.robot._
+import java.io.{ObjectOutputStream, ByteArrayOutputStream}
 
 object Main extends App {
 
+
+
   override def main(args: Array[String]) {
 
+    var max = 0;
+    (0 until 100000).par.foreach(i => {
+
+      val entry = Situations.getRandomEntry
+      val candidate = entry.toCandidate
+      //val field = Evaluator.createRandomField(0)
+      //println(candidate)
+
+      //val game = new Game(field)
+      val value = Evaluator.evaluate(candidate)
+      if (value > max) max = value
+    })
+    println(max)
+
+    /*
     val system = ActorSystem("cluster")
     system.actorOf(Props(classOf[Prisoner], "PrisonerA"), "player")
-    system.actorOf(Props(classOf[Prisoner], "PrisonerB"), "prisonerB")
-    system.actorOf(Props(classOf[Prisoner], "PrisonerC"), "PrisonerC")
 
     val router = system.actorOf(Props.empty.withRouter(
       ClusterRouterConfig(
@@ -23,7 +40,14 @@ object Main extends App {
 
     readLine()
     system.shutdown()
-    //system2.shutdown()
+    */
+  }
+
+  def getBytes(obj: Any) = {
+    val baos = new ByteArrayOutputStream(1024)
+    val o = new ObjectOutputStream(baos)
+    o.writeObject(obj)
+    baos.toByteArray
   }
 
 }
