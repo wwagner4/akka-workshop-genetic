@@ -18,13 +18,14 @@ case class Field(fieldSize: Int, itemCount: Int, cells: Seq[Cell.Value]) {
 
 class Game(field: Field) {
 
+  val moveRandom = new Random(0)
   val cells = mutable.ArraySeq(field.cells : _*)
   var itemCount = field.itemCount
   var x = 1;
   var y = 1;
 
   /** get value of cell on position */
-  def cell(x: Int, y: Int) : Cell.Value = cells(y * field.fieldSize + x)
+  private def cell(x: Int, y: Int) : Cell.Value = cells(y * field.fieldSize + x)
 
   def situation : Situation = {
     val sides = IndexedSeq(cell(x, y - 1), cell(x + 1, y), cell(x, y + 1), cell(x - 1, y))
@@ -34,25 +35,49 @@ class Game(field: Field) {
 
   def situationIndex : Int = Situations.getIndex(situation)
 
-  /** pick up item if possible */
-  def pickUp() : Boolean = {
+  /** pick up item if possible, return points */
+  private def pickUp() : Int = {
     val index = y * field.fieldSize + x
     if (cells(index) == Cell.STUFF)
     {
       itemCount -= 1
       cells(index) = Cell.EMPTY
-      true
+      10 // success: gain points
     }
     else
-      false
+      -1 // lost points
+  }
+
+  /** move robot if possible */
+  private def move(dx: Int, dy: Int) : Int = {
+    val nextX = x + dx
+    val nextY = y + dy
+    if (cell(nextX, nextY) != Cell.WALL)
+    {
+      x = nextX
+      y = nextY
+      0 // move successful
+    }
+    else
+      -5 // lost points
+  }
+
+  /** act as robot, returns points gained */
+  def act(decision: Decision) : Int = {
+    decision match {
+      case Move(dx, dy) => move(dx, dy)
+      case MoveRandom => act(Decisions.all(moveRandom.nextInt(4)))
+      case Stay => 0
+      case PickUp => pickUp()
+    }
   }
 
 }
 
 object Evaluator {
 
-  val fieldSize = 10;
-  val itemCount = 20;
+  val fieldSize = 12;
+  val itemCount = 50;
 
   lazy val testField = createRandomField(0)
 
@@ -84,21 +109,10 @@ object Evaluator {
     var points = 0
     for (i <- 0 until 200) {
       val index = game.situationIndex
-
-      // pick up object
       val decision = candidate.decisions(index)
-      if (decision.pickUp && game.pickUp())
-        points += 1
-
-      // move robot
-      val nextX = game.x + decision.direction.x
-      val nextY = game.y + decision.direction.y
-      if (game.cell(nextX, nextY) != Cell.WALL)
-      {
-        game.x = nextX
-        game.y = nextY
-      }
-      //println(game.x + " / " + game.y)
+      val p = game.act(decision)
+      //println(decision + ": " + p)
+      points += p
     }
     points
   }

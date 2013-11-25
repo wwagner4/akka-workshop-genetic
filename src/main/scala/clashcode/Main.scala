@@ -13,14 +13,9 @@ object Main extends App {
   override def main(args: Array[String]) {
 
     var max = 0;
-    (0 until 100000).par.foreach(i => {
-
+    (0 until 100).par.foreach(i => {
       val entry = Situations.getRandomEntry
       val candidate = entry.toCandidate
-      //val field = Evaluator.createRandomField(0)
-      //println(candidate)
-
-      //val game = new Game(field)
       val value = Evaluator.evaluate(candidate)
       if (value > max) max = value
     })
