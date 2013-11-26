@@ -1,6 +1,7 @@
 package clashcode.robot
 
 import scala.util.Random
+import scala.collection.parallel.ForkJoinTaskSupport
 
 
 /**
@@ -14,6 +15,9 @@ class Evolution(poolSize: Int, code: Option[String]) {
 
   var variability = 1.0
   var mutateCount = 5
+
+  val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
+  println(taskSupport.parallelismLevel)
 
   private def generate : CandidateCode = {
     if (candidates.length == 0)
@@ -52,7 +56,9 @@ class Evolution(poolSize: Int, code: Option[String]) {
 
     // evaluate next generation
     //val newPoints = newCodes.par.map(_.evaluate)
-    val newPoints = newCodes.par.map(_.evaluate)
+    val par = newCodes.par
+    par.tasksupport = taskSupport
+    val newPoints = par.map(_.evaluate)
 
     // get pool of best
     val allCandidates = candidates ++ newPoints

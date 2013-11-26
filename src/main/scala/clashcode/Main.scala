@@ -27,18 +27,13 @@ object Main extends App {
 
     //readLine()
     val start = System.currentTimeMillis
-    do
-    {
-      (0 until 10000).foreach {
-        i => {
-          ev.tick(20)
-          ev.debug()
-          save("best.txt", ev.candidates.head.code.bits)
-        }
+    (0 until 3000).foreach {
+      i => {
+        ev.tick(20)
+        ev.debug()
+        save("best.txt", ev.candidates.head.code.bits)
       }
     }
-    while(readLine().isEmpty)
-
     val done = System.currentTimeMillis - start
     println(done)
 

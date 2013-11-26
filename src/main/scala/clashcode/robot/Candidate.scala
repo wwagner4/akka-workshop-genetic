@@ -63,12 +63,14 @@ object Situations {
 
   val codeLength = all.length
 
-  private val indices : Map[Situation, Int] = all.zipWithIndex.toMap
+  private val indexBySituation = (0 to all.max).map(situation => all.indexOf(situation))
+
+  println(indexBySituation)
 
   def getSituation(top: Cell.Value, right: Cell.Value, bottom: Cell.Value, left: Cell.Value, center: Cell.Value) : Situation =
     (top.id * 3 * 3 * 3 * 3 + right.id * 3 * 3 * 3 + bottom.id * 3 * 3 + left.id * 3 + center.id)
 
-  def getIndex(situation: Situation) : Int = indices(situation)
+  def getIndex(situation: Situation) : Int = indexBySituation(situation)
 
   def getRandomCode : CandidateCode = {
     CandidateCode(Array.fill(codeLength)(Random.nextInt(Decisions.count).toByte))
