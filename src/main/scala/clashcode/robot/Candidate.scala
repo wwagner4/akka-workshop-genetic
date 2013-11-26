@@ -63,7 +63,7 @@ object Situations {
 
   val codeLength = all.length
 
-  private val indexBySituation = (0 to all.max).map(situation => all.indexOf(situation))
+  private val indexBySituation = (0 to all.max).map(situation => all.indexOf(situation)).toArray
 
   println(indexBySituation)
 

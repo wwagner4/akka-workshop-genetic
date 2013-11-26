@@ -27,7 +27,7 @@ object Main extends App {
 
     //readLine()
     val start = System.currentTimeMillis
-    (0 until 3000).foreach {
+    (0 until 30000).foreach {
       i => {
         ev.tick(20)
         ev.debug()

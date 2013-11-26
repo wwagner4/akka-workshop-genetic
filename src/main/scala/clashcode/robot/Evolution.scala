@@ -10,11 +10,12 @@ class Evolution(poolSize: Int, code: Option[String]) {
 
   var random = new Random()
   var candidates = code.map(c => CandidatePoints(CandidateCode(c.map(_.toString.toByte).toArray), 10000)).toSeq
+  var candidateHashes = candidates.map(_.code.bits.toList.hashCode)
   var generation = 0
   tick()
 
   var variability = 1.0
-  var mutateCount = 5
+  var mutateCount = 8
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
   println(taskSupport.parallelismLevel)
@@ -36,9 +37,19 @@ class Evolution(poolSize: Int, code: Option[String]) {
     val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
 
     // mutate
-    for (i <- 0 until mutateCount) {
-      result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
+    do
+    {
+      for (i <- 0 until mutateCount) {
+        result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
+      }
     }
+    while({
+      // keep mutating if duplicate candidate
+      val compareList = result.toList.hashCode
+      val mutate = candidateHashes.contains(compareList)
+      //if (mutate) println("keep mutating")
+      mutate
+    })
 
     CandidateCode(result)
   }
@@ -64,6 +75,8 @@ class Evolution(poolSize: Int, code: Option[String]) {
     val allCandidates = candidates ++ newPoints
     val bestCandidates = allCandidates.sortBy(- _.points).take(poolSize)
     candidates = bestCandidates
+    candidateHashes = bestCandidates.map(_.code.bits.toList.hashCode)
+
     bestCandidates(0) // return best candidate
   }
 
@@ -72,7 +85,7 @@ class Evolution(poolSize: Int, code: Option[String]) {
 
     variability = candidates.map(_.points).distinct.length / candidates.length.toDouble
     //mutateCount < Situations.codeLength / 10
-    if (variability < 0.05) mutateCount += 1
+    //if (variability < 0.05) mutateCount += 1
 
     println("Worst: " + candidates.last.points + ", mut: " + mutateCount + ", var: " + variability)
   }

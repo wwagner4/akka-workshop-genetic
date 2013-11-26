@@ -74,7 +74,7 @@ object Evaluator {
 
   private val itemCount = fieldSize * fieldSize / 2; // 50%
 
-  lazy private val testFields = (0 until 200).map(createRandomField)
+  lazy private val testFields = (0 until 20).map(createRandomField)
 
   println(Evaluator.testFields.map(f => f.items.count(c => c)).sum * 10)
 
