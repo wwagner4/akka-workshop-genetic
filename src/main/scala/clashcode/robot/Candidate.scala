@@ -8,9 +8,6 @@ object Cell extends Enumeration {
   val STUFF = Value(2)
 }
 
-/** represents a situation of the robot with 4 directions and presence of stuff */
-case class Situation(top: Cell.Value, right: Cell.Value, bottom: Cell.Value, left: Cell.Value, canPickup: Boolean)
-
 /** the code that represents the decisions of the robot in all situations */
 case class CandidateCode(bits: Array[Byte]) {
   if (bits.length != Situations.codeLength) throw new IllegalArgumentException("Length of bits must be " + Situations.codeLength)
@@ -51,20 +48,25 @@ case class CandidatePoints(code: CandidateCode, points: Int)
 
 object Situations {
 
+  type Situation = Int
+
   val all : IndexedSeq[Situation] = {
     val result = for {
-      canPickup <- List(false, true)
+      center <- List(Cell.EMPTY, Cell.STUFF)
       topCell <- Cell.values
       rightCell <- Cell.values
       bottomCell <- Cell.values if (topCell != Cell.WALL || bottomCell != Cell.WALL)
       leftCell <- Cell.values if (rightCell != Cell.WALL || leftCell != Cell.WALL)
-    } yield (Situation(topCell, rightCell, bottomCell, leftCell, canPickup))
+    } yield (getSituation(topCell, rightCell, bottomCell, leftCell, center))
     result.toIndexedSeq
   }
 
   val codeLength = all.length
 
-  lazy private val indices : Map[Situation, Int] = all.zipWithIndex.toMap
+  private val indices : Map[Situation, Int] = all.zipWithIndex.toMap
+
+  def getSituation(top: Cell.Value, right: Cell.Value, bottom: Cell.Value, left: Cell.Value, center: Cell.Value) : Situation =
+    (top.id * 3 * 3 * 3 * 3 + right.id * 3 * 3 * 3 + bottom.id * 3 * 3 + left.id * 3 + center.id)
 
   def getIndex(situation: Situation) : Int = indices(situation)
 

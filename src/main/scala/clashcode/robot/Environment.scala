@@ -23,12 +23,9 @@ class Game(field: Field, random: Random) {
       Cell.EMPTY
   }
 
-  def situation : Situation = {
-    val canPickup = cell(x, y) == Cell.STUFF;
-    Situation(cell(x, y - 1), cell(x + 1, y), cell(x, y + 1), cell(x - 1, y), canPickup)
+  def situationIndex : Int = {
+    Situations.getIndex(Situations.getSituation(cell(x, y - 1), cell(x + 1, y), cell(x, y + 1), cell(x - 1, y), cell(x, y)))
   }
-
-  def situationIndex : Int = Situations.getIndex(situation)
 
   /** pick up item if possible, return points */
   private def pickUp() : Int = {
@@ -87,7 +84,7 @@ object Evaluator {
 
     // place items
     var fieldItemCount = 0
-    val items = mutable.ArraySeq.fill(fieldSize * fieldSize)(false)
+    val items = Array.fill(fieldSize * fieldSize)(false)
     while (fieldItemCount < itemCount) {
       val index = random.nextInt(items.length)
       if (!items(index)) {
