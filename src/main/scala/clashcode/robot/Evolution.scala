@@ -5,10 +5,10 @@ import scala.util.Random
 
 /**
  */
-class Evolution(poolSize: Int) {
+class Evolution(poolSize: Int, code: Option[String]) {
 
   var random = new Random()
-  var candidates = Seq.empty[CandidatePoints]
+  var candidates = code.map(c => CandidatePoints(CandidateCode(c.map(_.toString.toByte).toArray), 10000)).toSeq
   var generation = 0
   tick()
 

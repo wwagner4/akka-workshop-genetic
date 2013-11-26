@@ -12,13 +12,17 @@ object Main extends App {
 
   override def main(args: Array[String]) {
 
+    /*
     val situationMapping = Situations.all.map(s =>
       s.top.id * 3 * 3 * 3 * 3 + s.right.id * 3 * 3 * 3 + s.bottom.id * 3 * 3 + s.left.id * 3 + (if (s.canPickup) 2 else 0))
     println(situationMapping.mkString(","))
-
     return;
+    */
 
-    val ev = new Evolution(200)
+    println("bytes: " + getBytes(Situations.getRandomCode).length)
+
+    val code = "32301032310213113033245221502101254221321145231041450120430151101040444424342444444014444440444410144044444441443114403444440434"
+    val ev = new Evolution(200, None)
     println(ev.tick(10).points)
 
     //readLine()
