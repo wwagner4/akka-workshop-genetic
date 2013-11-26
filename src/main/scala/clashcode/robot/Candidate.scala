@@ -63,7 +63,7 @@ object Situations {
 
   val codeLength = all.length
 
-  private val indexBySituation = (0 to all.max).map(situation => all.indexOf(situation)).toArray
+  val indexBySituation = (0 to all.max).map(situation => all.indexOf(situation)).toArray
 
   def getSituation(top: Cell.Value, right: Cell.Value, bottom: Cell.Value, left: Cell.Value, center: Cell.Value) : Situation =
     (top.id * 3 * 3 * 3 * 3 + right.id * 3 * 3 * 3 + bottom.id * 3 * 3 + left.id * 3 + center.id)
@@ -74,4 +74,34 @@ object Situations {
     CandidateCode(Array.fill(codeLength)(Random.nextInt(Decisions.count).toByte))
   }
 
+
+  def translateFromPaper() {
+    //val code = "254355153256235251056355461151336154151034156110550150052030256256132252350325112052333054055231255051336154150665264150266506012264453605631520256431054354632404350334153250253251352352045150130156213436252353223135051260513356201524514343432"
+    val code = "656353656252353252656353656151353151252353252151353151656353656252353252656353656050353050252353252050353050151353151252353252151353151050353050252353252050353050656353562523532526563536656151353151252353252151353151656353656252353252656353454"
+    val decisions = code.zipWithIndex.map {
+      case (c, i) => {
+        def translate(i : Int) = if (i == 0) 0 else if (i == 1) 2 else 1
+        val top = translate((i / (3 * 3 * 3 * 3)) % 3)
+        val bottom = translate((i / (3 * 3 * 3)) % 3)
+        val right = translate((i / (3 * 3)) % 3)
+        val left = translate((i / (3)) % 3)
+        val center = translate(i % 3)
+        val situation = (top * 3 * 3 * 3 * 3 + right * 3 * 3 * 3 + bottom * 3 * 3 + left * 3 + center)
+
+        val decision = c.toString.toInt
+        val translatedDecision =
+          if (decision == 0) 0
+          else if (decision == 1) 2
+          else if (decision == 2) 1
+          else if (decision == 3) 3
+          else if (decision == 4) 5 //stay put
+          else if (decision == 5) 4
+          else 5 // random
+
+        (situation : Situation, translatedDecision)
+      }
+    }.toMap
+
+    println(all.map(situation => decisions(situation)).mkString(""))
+  }
 }
