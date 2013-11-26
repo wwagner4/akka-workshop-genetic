@@ -4,7 +4,7 @@ import akka.actor.{Props, ActorSystem}
 import akka.routing.{RandomRouter, ConsistentHashingRouter, FromConfig}
 import akka.cluster.routing.{ClusterRouterSettings, ClusterRouterConfig}
 import clashcode.robot._
-import java.io.{ObjectOutputStream, ByteArrayOutputStream}
+import java.io.{FileOutputStream, ObjectOutputStream, ByteArrayOutputStream}
 
 object Main extends App {
 
@@ -12,14 +12,25 @@ object Main extends App {
 
   override def main(args: Array[String]) {
 
-    var max = 0;
-    (0 until 100).par.foreach(i => {
-      val entry = Situations.getRandomEntry
-      val candidate = entry.toCandidate
-      val value = Evaluator.evaluate(candidate)
-      if (value > max) max = value
-    })
-    println(max)
+    val ev = new Evolution(200)
+    println(ev.tick(10).points)
+
+    //readLine()
+    val start = System.currentTimeMillis
+    do
+    {
+      (0 until 10000).foreach {
+        i => {
+          ev.tick(20)
+          ev.debug()
+          save("best.txt", ev.candidates.head.code.bits)
+        }
+      }
+    }
+    while(readLine().isEmpty)
+
+    val done = System.currentTimeMillis - start
+    println(done)
 
     /*
     val system = ActorSystem("cluster")
@@ -43,6 +54,12 @@ object Main extends App {
     val o = new ObjectOutputStream(baos)
     o.writeObject(obj)
     baos.toByteArray
+  }
+
+  def save(name: String, array: Seq[Byte]) {
+    val o = new FileOutputStream("best.txt")
+    o.write(array.mkString.getBytes)
+    o.close()
   }
 
 }

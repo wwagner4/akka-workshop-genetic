@@ -16,9 +16,8 @@ case class Field(fieldSize: Int, itemCount: Int, cells: Seq[Cell.Value]) {
 
 }
 
-class Game(field: Field) {
+class Game(field: Field, random: Random) {
 
-  val moveRandom = new Random(0)
   val cells = mutable.ArraySeq(field.cells : _*)
   var itemCount = field.itemCount
   var x = 1;
@@ -28,9 +27,8 @@ class Game(field: Field) {
   private def cell(x: Int, y: Int) : Cell.Value = cells(y * field.fieldSize + x)
 
   def situation : Situation = {
-    val sides = IndexedSeq(cell(x, y - 1), cell(x + 1, y), cell(x, y + 1), cell(x - 1, y))
     val canPickup = cell(x, y) == Cell.STUFF;
-    Situation(sides, canPickup)
+    Situation(cell(x, y - 1), cell(x + 1, y), cell(x, y + 1), cell(x - 1, y), canPickup)
   }
 
   def situationIndex : Int = Situations.getIndex(situation)
@@ -66,7 +64,9 @@ class Game(field: Field) {
   def act(decision: Decision) : Int = {
     decision match {
       case Move(dx, dy) => move(dx, dy)
-      case MoveRandom => act(Decisions.all(moveRandom.nextInt(4)))
+      case MoveRandom =>
+        val randomMove = Decisions.all(random.nextInt(4)).asInstanceOf[Move]
+        move(randomMove.x, randomMove.y)
       case Stay => 0
       case PickUp => pickUp()
     }
@@ -76,23 +76,25 @@ class Game(field: Field) {
 
 object Evaluator {
 
-  val fieldSize = 12;
-  val itemCount = 50;
+  private val fieldSize = 12;
+  private val itemCount = 50;
 
-  lazy val testField = createRandomField(0)
+  lazy private val testFields = (0 until 100).map(createRandomField)
 
-  lazy val possibleLocations = for {
+  lazy private val possibleLocations = for {
     x <- 1 until fieldSize - 1
     y <- 1 until fieldSize - 1
   } yield (x + y * fieldSize)
 
-  lazy val wallLocations = (for {
+  lazy private val wallLocations = (for {
     x <- 0 until fieldSize
     y <- 0 until fieldSize if (y == 0 || x == 0 || x == fieldSize - 1 || y == fieldSize - 1)
   } yield (x + y * fieldSize)).toSet
 
+  println(Evaluator.testFields.forall(f => f.cells.count(c => c == Cell.STUFF) == 50))
+
   /** create deterministic random field from given random seed */
-  def createRandomField(seed: Int) = {
+  private def createRandomField(seed: Int) = {
     val random = new Random(seed)
     val locations = random.shuffle(possibleLocations).take(itemCount).toSet
     val cells = (0 until fieldSize * fieldSize).map(index =>
@@ -103,17 +105,25 @@ object Evaluator {
     Field(fieldSize, itemCount, cells)
   }
 
-  /** get points for given candidate */
-  def evaluate(candidate: Candidate) : Int = {
-    val game = new Game(testField)
+  /** get points for given candidate
+    * 20 trials on different fields, */
+  def evaluate(decisions: IndexedSeq[Decision]) : Int = {
+    val moveRandom = new Random(0)
     var points = 0
-    for (i <- 0 until 200) {
-      val index = game.situationIndex
-      val decision = candidate.decisions(index)
-      val p = game.act(decision)
-      //println(decision + ": " + p)
-      points += p
-    }
+
+    // test on 20 fields
+    testFields.foreach(testField => {
+      val game = new Game(testField, moveRandom)
+
+      // max 200 robot turns
+      for (i <- 0 until 200) {
+        val index = game.situationIndex
+        val decision = decisions(index)
+        val p = game.act(decision)
+        //println(decision + ": " + p)
+        points += p
+      }
+    })
     points
   }
 
