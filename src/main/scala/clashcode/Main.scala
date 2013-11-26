@@ -12,6 +12,12 @@ object Main extends App {
 
   override def main(args: Array[String]) {
 
+    val situationMapping = Situations.all.map(s =>
+      s.top.id * 3 * 3 * 3 * 3 + s.right.id * 3 * 3 * 3 + s.bottom.id * 3 * 3 + s.left.id * 3 + (if (s.canPickup) 2 else 0))
+    println(situationMapping.mkString(","))
+
+    return;
+
     val ev = new Evolution(200)
     println(ev.tick(10).points)
 

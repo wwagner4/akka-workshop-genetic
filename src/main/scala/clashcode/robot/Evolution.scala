@@ -65,7 +65,8 @@ class Evolution(poolSize: Int) {
     println("Best: " + candidates.take(3).map(_.points).mkString(", "))
 
     variability = candidates.map(_.points).distinct.length / candidates.length.toDouble
-    if (variability < 0.05 && mutateCount < Situations.codeLength / 10) mutateCount += 1
+    //mutateCount < Situations.codeLength / 10
+    if (variability < 0.05) mutateCount += 1
 
     println("Worst: " + candidates.last.points + ", mut: " + mutateCount + ", var: " + variability)
   }
