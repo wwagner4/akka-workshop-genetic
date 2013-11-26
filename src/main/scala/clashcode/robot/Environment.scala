@@ -74,15 +74,10 @@ object Evaluator {
 
   private val itemCount = fieldSize * fieldSize / 2; // 50%
 
-  lazy private val testFields = (0 until 20).map(createRandomField)
-
-  println(Evaluator.testFields.map(f => f.items.count(c => c)).sum * 10)
+  lazy private val testFields = (0 until 200).map(seed => createRandomField(new Random(seed)))
 
   /** create deterministic random field from given random seed */
-  private def createRandomField(seed: Int) = {
-    val random = new Random(seed)
-
-    // place items
+  private def createRandomField(random: Random) = {
     var fieldItemCount = 0
     val items = Array.fill(fieldSize * fieldSize)(false)
     while (fieldItemCount < itemCount) {
@@ -92,7 +87,6 @@ object Evaluator {
         fieldItemCount += 1
       }
     }
-
     Field(fieldSize, itemCount, items)
   }
 

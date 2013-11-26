@@ -65,8 +65,6 @@ object Situations {
 
   private val indexBySituation = (0 to all.max).map(situation => all.indexOf(situation)).toArray
 
-  println(indexBySituation)
-
   def getSituation(top: Cell.Value, right: Cell.Value, bottom: Cell.Value, left: Cell.Value, center: Cell.Value) : Situation =
     (top.id * 3 * 3 * 3 * 3 + right.id * 3 * 3 * 3 + bottom.id * 3 * 3 + left.id * 3 + center.id)
 

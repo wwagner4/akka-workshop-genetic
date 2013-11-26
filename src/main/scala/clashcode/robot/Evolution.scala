@@ -9,28 +9,22 @@ import scala.collection.parallel.ForkJoinTaskSupport
 class Evolution(poolSize: Int, code: Option[String]) {
 
   var random = new Random()
-  var candidates = code.map(c => CandidatePoints(CandidateCode(c.map(_.toString.toByte).toArray), 10000)).toSeq
+  var candidates = code.map(c => CandidateCode(c.map(_.toString.toByte).toArray).evaluate).toSeq
   var candidateHashes = candidates.map(_.code.bits.toList.hashCode)
-  var generation = 0
-  tick()
 
+  var generation = 0
   var variability = 1.0
-  var mutateCount = 8
+  var mutateCount = 3
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
   println(taskSupport.parallelismLevel)
 
-  private def generate : CandidateCode = {
-    if (candidates.length == 0)
-      Situations.getRandomCode // generate random candidates
-    else {
-      val left = candidates(random.nextInt(candidates.length))
-      val right = candidates(random.nextInt(candidates.length))
-      crossover(left.code, right.code)
-    }
-  }
+  tick()
 
-  private def crossover(left: CandidateCode, right: CandidateCode) : CandidateCode = {
+  private def crossover : CandidateCode = {
+
+    val left = candidates(random.nextInt(candidates.length)).code
+    val right = candidates(random.nextInt(candidates.length)).code
 
     // crossover
     val leftCount = random.nextInt(left.bits.length)
@@ -60,10 +54,13 @@ class Evolution(poolSize: Int, code: Option[String]) {
   }
 
   def tick() : CandidatePoints = {
+
     generation += 1
 
     // create next generation candidates
-    val newCodes = (0 until poolSize).map(_ => generate)
+    val newCodes =
+      (0 until poolSize - candidates.length).map(_ => Situations.getRandomCode) ++
+      (0 until candidates.length).map(_ => crossover)
 
     // evaluate next generation
     //val newPoints = newCodes.par.map(_.evaluate)
@@ -86,6 +83,9 @@ class Evolution(poolSize: Int, code: Option[String]) {
     variability = candidates.map(_.points).distinct.length / candidates.length.toDouble
     //mutateCount < Situations.codeLength / 10
     //if (variability < 0.05) mutateCount += 1
+    val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
+    println(mutResult)
+    mutateCount = mutResult.toInt.max(1)
 
     println("Worst: " + candidates.last.points + ", mut: " + mutateCount + ", var: " + variability)
   }
