@@ -13,8 +13,6 @@ class Evolution(poolSize: Int, code: Option[String]) {
   var candidateHashes = candidates.map(_.code.bits.toList.hashCode)
 
   var generation = 0
-  var variability = 1.0
-  var mutateCount = 3
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
   println(taskSupport.parallelismLevel)
@@ -33,7 +31,7 @@ class Evolution(poolSize: Int, code: Option[String]) {
     // mutate
     do
     {
-      for (i <- 0 until mutateCount) {
+      for (i <- 0 until 4) {
         result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
       }
     }
@@ -78,16 +76,14 @@ class Evolution(poolSize: Int, code: Option[String]) {
   }
 
   def debug() {
-    println("Best: " + candidates.take(3).map(_.points).mkString(", "))
-
-    variability = candidates.map(_.points).distinct.length / candidates.length.toDouble
-    //mutateCount < Situations.codeLength / 10
-    //if (variability < 0.05) mutateCount += 1
-    val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-    println(mutResult)
-    mutateCount = mutResult.toInt.max(1)
-
-    println("Worst: " + candidates.last.points + ", mut: " + mutateCount + ", var: " + variability)
+    val a = candidates(0).points
+    val b = candidates(1).points
+    val c = candidates(2).points
+    val d = candidates.last.points
+    val v = candidates.map(_.points).distinct.length / candidates.length.toDouble
+    println(s"---- generation $generation")
+    println(s"     points best three: $a $b $c last: $d")
+    println(f"     variabillity: $v%.4f")
   }
 
 }
