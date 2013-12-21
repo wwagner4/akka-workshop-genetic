@@ -9,7 +9,7 @@ import java.io.{ FileOutputStream, ObjectOutputStream, ByteArrayOutputStream }
 object MainWW extends App {
 
   val code = "55355322353532311311311354322344234441130030032230303231131131134444444444444444444444444544445344113444444444444444444444444444"
-  val ev = new Evolution(200, Some(code))
+  val ev = new Evolution(200, code)
   val start = System.currentTimeMillis
   (0 until 30000).foreach {
     i =>
