@@ -2,10 +2,10 @@ package clashcode.robot
 
 import scala.util.Random
 import scala.collection.parallel.ForkJoinTaskSupport
-import clashcode.CandidateCodeFactory
 
 
 /**
+ * 
  */
 class Evolution(candidateCodeFactory: CandidateCodeFactory) {
 
@@ -108,4 +108,11 @@ class Evolution(candidateCodeFactory: CandidateCodeFactory) {
   }
 
 }
+
+trait CandidateCodeFactory {
+
+  def createCodes: Seq[CandidateCode]
+
+}
+
 
