@@ -82,7 +82,7 @@ class Evolution(poolSize: Int, code: Option[String]) {
     //mutateCount < Situations.codeLength / 10
     //if (variability < 0.05) mutateCount += 1
     val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-    println(mutResult)
+    //println(mutResult)
     mutateCount = mutResult.toInt.max(1)
 	  
     val a = candidates(0).points
@@ -96,10 +96,11 @@ class Evolution(poolSize: Int, code: Option[String]) {
       val c = "c"
       val last = "last"
       val vari = "vari"
-      println(f"$a%5s\t$b%5s\t$b%5s\t$c%5s\t$last%5s\t$vari%5s")
+      val mut = "mut"
+      println(f"$a%5s\t$b%5s\t$b%5s\t$c%5s\t$last%5s\t$vari%5s\t$mut%5s")
       firstDebug = false
     }
-    println(f"$generation%5d\t$a%5d\t$b%5d\t$c%5d\t$last%5d\t$vari%5.3f")
+    println(f"$generation%5d\t$a%5d\t$b%5d\t$c%5d\t$last%5d\t$vari%5.3f\t$mutResult%5.3f")
   }
 
 }
