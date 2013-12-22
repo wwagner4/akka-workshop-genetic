@@ -16,8 +16,6 @@ class Evolution(candidateCodeFactory: CandidateCodeFactory) {
   var candidateHashes = candidates.map(_.code.bits.toList.hashCode)
 
   var generation = 0
-  var variability = 1.0
-  var mutateCount = 3
   var firstDebug = true
   
   val variCalc = new VarianceCandidatePoints()
@@ -37,6 +35,9 @@ class Evolution(candidateCodeFactory: CandidateCodeFactory) {
     val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
 
     // mutate
+    val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
+    //println(mutResult)
+    val mutateCount = mutResult.toInt.max(1)
     do
     {
       for (i <- 0 until mutateCount) {
@@ -86,9 +87,6 @@ class Evolution(candidateCodeFactory: CandidateCodeFactory) {
   def debug() {
     //mutateCount < Situations.codeLength / 10
     //if (variability < 0.05) mutateCount += 1
-    val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-    //println(mutResult)
-    mutateCount = mutResult.toInt.max(1)
 	  
     if (firstDebug) {
       val gen = "gen"
@@ -96,15 +94,14 @@ class Evolution(candidateCodeFactory: CandidateCodeFactory) {
       val last = "last"
       val vari = "vari"
       val vari1 = "vari1"
-      val mut = "mut"
-      println(f"$gen%5s\t$first%5s\t$last%5s\t$vari%5s\t$vari1%5s\t$mut%5s")
+      println(f"$gen%5s\t$first%5s\t$last%5s\t$vari%5s\t$vari1%5s")
       firstDebug = false
     }
     val first = candidates(0).points
     val last = candidates.last.points
     val vari = candidates.map(_.points).distinct.length / candidates.length.toDouble
     val vari1 = variCalc.variance(candidates)
-    println(f"$generation%5d\t$first%5d\t$last%5d\t$vari%5.3f\t$vari1%5.3f\t$mutResult%5.3f")
+    println(f"$generation%5d\t$first%5d\t$last%5d\t$vari%5.3f\t$vari1%5.3f")
   }
 
 }
