@@ -17,7 +17,7 @@ class Evolution(poolSize: Int, code: Option[String]) {
   var mutateCount = 3
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
-  println(taskSupport.parallelismLevel)
+  //println(taskSupport.parallelismLevel)
 
   tick()
 

@@ -16,11 +16,11 @@ object Main extends App {
     //Situations.translateFromPaper()
     //return;
 
-    println("bytes: " + getBytes(Situations.getRandomCode).length)
+    // println("bytes: " + getBytes(Situations.getRandomCode).length)
 
     val code = "55355322353532311311311354322344234441130030032230303231131131134444444444444444444444444544445344113444444444444444444444444444"
     val ev = new Evolution(200, Some(code))
-    println(ev.tick(10).points)
+    //println(ev.tick(10).points)
 
     //readLine()
     val start = System.currentTimeMillis
