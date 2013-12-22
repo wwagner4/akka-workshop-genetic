@@ -78,16 +78,12 @@ class Evolution(poolSize: Int, code: Option[String]) {
   }
 
   def debug() {
-    println("Best: " + candidates.take(3).map(_.points).mkString(", "))
-
-    variability = candidates.map(_.points).distinct.length / candidates.length.toDouble
-    //mutateCount < Situations.codeLength / 10
-    //if (variability < 0.05) mutateCount += 1
-    val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-    println(mutResult)
-    mutateCount = mutResult.toInt.max(1)
-
-    println("Worst: " + candidates.last.points + ", mut: " + mutateCount + ", var: " + variability)
+    val a = candidates(0).points
+    val b = candidates(1).points
+    val c = candidates(2).points
+    val last = candidates.last.points
+    val vari = candidates.map(_.points).distinct.length / candidates.length.toDouble
+    println(f"$generation%d5\t$a%d5\t$b%d5\t$c%d5\t$last%d5\t$vari%5.3f")
   }
 
 }
