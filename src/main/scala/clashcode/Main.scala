@@ -18,8 +18,8 @@ object Main extends App {
 
     // println("bytes: " + getBytes(Situations.getRandomCode).length)
 
-    val code = "55355322353532311311311354322344234441130030032230303231131131134444444444444444444444444544445344113444444444444444444444444444"
-    val ev = new Evolution(200, Some(code))
+    //val code = "55355322353532311311311354322344234441130030032230303231131131134444444444444444444444444544445344113444444444444444444444444444"
+    val ev = new Evolution(RandomCandidates(200))
     //println(ev.tick(10).points)
 
     //readLine()
@@ -64,4 +64,18 @@ object Main extends App {
     o.close()
   }
 
+}
+
+trait CandidateCodeFactory {
+  
+  def createCodes: Seq[CandidateCode] 
+  
+}
+
+case class RandomCandidates(poolSize: Int) extends CandidateCodeFactory {
+  
+  def createCodes: Seq[CandidateCode] = {
+    (1 to poolSize).map(_ => Situations.getRandomCode)
+  }  
+    
 }

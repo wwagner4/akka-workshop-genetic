@@ -2,14 +2,17 @@ package clashcode.robot
 
 import scala.util.Random
 import scala.collection.parallel.ForkJoinTaskSupport
+import clashcode.CandidateCodeFactory
 
 
 /**
  */
-class Evolution(poolSize: Int, code: Option[String]) {
+class Evolution(candidateCodeFactory: CandidateCodeFactory) {
 
+  var candidates = candidateCodeFactory.createCodes.map(c => c.evaluate).toSeq
+  val poolSize = candidates.size
+  
   var random = new Random()
-  var candidates = code.map(c => CandidateCode(c.map(_.toString.toByte).toArray).evaluate).toSeq
   var candidateHashes = candidates.map(_.code.bits.toList.hashCode)
 
   var generation = 0
