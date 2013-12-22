@@ -15,49 +15,17 @@ class Evolution(poolSize: Int, code: String) {
   var candidateHashes: Seq[Int] = candidates.map(_.code.bits.toList.hashCode)
 
   var generation = 0
-  var variability = 1.0
-  var mutateCount = 3
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
   println(taskSupport.parallelismLevel)
 
   tick()
 
-  private def crossover : CandidateCode = {
-
-    val left = candidates(random.nextInt(candidates.length)).code
-    val right = candidates(random.nextInt(candidates.length)).code
-
-    // crossover
-    val leftCount = random.nextInt(left.bits.length)
-    val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
-
-    // mutate
-    do
-    {
-      for (i <- 0 until mutateCount) {
-        result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
-      }
-    }
-    while({
-      // keep mutating if duplicate candidate
-      val compareList = result.toList.hashCode
-      val mutate = candidateHashes.contains(compareList)
-      //if (mutate) println("keep mutating")
-      mutate
-    })
-
-    CandidateCode(result)
-  }
-
-  def tick(count: Int) : CandidatePoints = {
-    (1 until count).foreach(_ => tick())
-    tick()
-  }
-
+  /**
+   * Performs all the necessary steps during one generation
+   */
   def tick() : CandidatePoints = {
 
-    println(s"tick ${candidates.size}")
     generation += 1
 
     // create next generation candidates
@@ -80,17 +48,50 @@ class Evolution(poolSize: Int, code: String) {
     bestCandidates(0) // return best candidate
   }
 
-  def debug() {
-    println("Best: " + candidates.take(3).map(_.points).mkString(", "))
+  def tick(count: Int) : CandidatePoints = {
+    (1 until count).foreach(_ => tick())
+    tick()
+  }
 
-    variability = candidates.map(_.points).distinct.length / candidates.length.toDouble
+  private def crossover : CandidateCode = {
+
+    val left = candidates(random.nextInt(candidates.length)).code
+    val right = candidates(random.nextInt(candidates.length)).code
+
+    // crossover
+    val leftCount = random.nextInt(left.bits.length)
+    val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
+
+    // mutate
     //mutateCount < Situations.codeLength / 10
     //if (variability < 0.05) mutateCount += 1
+    //println(mutResult)
     val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-    println(mutResult)
-    mutateCount = mutResult.toInt.max(1)
+    val mutateCount = mutResult.toInt.max(1)
+    do
+    {
+      for (i <- 0 until mutateCount) {
+        result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
+      }
+    }
+    while({
+      // keep mutating if duplicate candidate
+      val compareList = result.toList.hashCode
+      val mutate = candidateHashes.contains(compareList)
+      //if (mutate) println("keep mutating")
+      mutate
+    })
 
-    println("Worst: " + candidates.last.points + ", mut: " + mutateCount + ", var: " + variability)
+    CandidateCode(result)
+  }
+
+  def debug() {
+    val a = candidates(0).points
+    val b = candidates(1).points
+    val c = candidates(2).points
+    val last = candidates.last.points
+    val vari = candidates.map(_.points).distinct.length / candidates.length.toDouble
+    println(f"$generation%d5\t$a%d5\t$b%d5\t$c%d5\t$last%d5\t$vari%5.3f")
   }
 
 }
