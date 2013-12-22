@@ -16,6 +16,8 @@ class Evolution(poolSize: Int, code: Option[String]) {
   var variability = 1.0
   var mutateCount = 3
   var firstDebug = true
+  
+  val variCalc = new VarianceCandidatePoints()
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
   //println(taskSupport.parallelismLevel)
@@ -85,22 +87,22 @@ class Evolution(poolSize: Int, code: Option[String]) {
     //println(mutResult)
     mutateCount = mutResult.toInt.max(1)
 	  
-    val a = candidates(0).points
-    val b = candidates(1).points
-    val c = candidates(2).points
-    val last = candidates.last.points
-    val vari = candidates.map(_.points).distinct.length / candidates.length.toDouble
     if (firstDebug) {
-      val a = "a"
-      val b = "b"
-      val c = "c"
+      val gen = "gen"
+      val first = "first"
       val last = "last"
       val vari = "vari"
+      val vari1 = "vari1"
       val mut = "mut"
-      println(f"$a%5s\t$b%5s\t$b%5s\t$c%5s\t$last%5s\t$vari%5s\t$mut%5s")
+      println(f"$gen%5s\t$first%5s\t$last%5s\t$vari%5s\t$vari1%5s\t$mut%5s")
       firstDebug = false
     }
-    println(f"$generation%5d\t$a%5d\t$b%5d\t$c%5d\t$last%5d\t$vari%5.3f\t$mutResult%5.3f")
+    val first = candidates(0).points
+    val last = candidates.last.points
+    val vari = candidates.map(_.points).distinct.length / candidates.length.toDouble
+    val vari1 = variCalc.variance(candidates)
+    println(f"$generation%5d\t$first%5d\t$last%5d\t$vari%5.3f\t$vari1%5.3f\t$mutResult%5.3f")
   }
 
 }
+
