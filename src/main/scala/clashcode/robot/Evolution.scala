@@ -7,7 +7,7 @@ import scala.collection.parallel.ForkJoinTaskSupport
 /**
  * 
  */
-class Evolution(initials: InitialCandidatesFactory, selection: SelectionStrategy) {
+class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy) {
 
   var candidates = initials.createCodes.map(c => c.evaluate).toSeq
   val poolSize = candidates.size
@@ -25,10 +25,10 @@ class Evolution(initials: InitialCandidatesFactory, selection: SelectionStrategy
 
   tick()
 
-  private def crossover : CandidateCode = {
+  private def crossover(couple: Couple) : CandidateCode = {
 
-    val left = candidates(random.nextInt(candidates.length)).code
-    val right = candidates(random.nextInt(candidates.length)).code
+    val left = couple.left.code
+    val right = couple.right.code
 
     // crossover
     val leftCount = random.nextInt(left.bits.length)
@@ -65,10 +65,10 @@ class Evolution(initials: InitialCandidatesFactory, selection: SelectionStrategy
     generation += 1
 
     // create next generation candidates
-    val newCodes =
-      (0 until poolSize - candidates.length).map(_ => Situations.getRandomCode) ++
-      (0 until candidates.length).map(_ => crossover)
-
+    val couples = selStrat.selectCouples(candidates)
+    val newCodes = couples.map(couple => crossover(couple))
+    //println(s"newCodes size: ${newCodes.size}")
+    
     // evaluate next generation
     //val newPoints = newCodes.par.map(_.evaluate)
     val par = newCodes.par

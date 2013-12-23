@@ -16,10 +16,10 @@ object Main extends App {
   val ts: String = createTimestamp
 
   //val InitialCandidatesFactory = initial.RandomCandidates.defaultSize
-  val fac:InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
+  val fac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
-  val selStrat = selection.RandomSelectionStrategy()
-  
+  val selStrat = selection.RandomSelectionStrategy.default
+
   val ev = new Evolution(fac, selStrat)
   val start = System.currentTimeMillis
   (0 until 300).foreach {
@@ -95,8 +95,6 @@ package initial {
 
   }
 
-
-  
   object SomeFixedCandidates {
 
     /**
@@ -117,12 +115,25 @@ package initial {
 }
 
 package selection {
-  
-  case class RandomSelectionStrategy extends SelectionStrategy {
+
+  object RandomSelectionStrategy {
     
-      def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple] = ???
+    def default: SelectionStrategy = RandomSelectionStrategy(new java.util.Random())
     
   }
   
-  
+  case class RandomSelectionStrategy(random: java.util.Random) extends SelectionStrategy {
+
+    def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple] = {
+      val cnt = orderedCandidates.size
+      def randomCouple: Couple = {
+        val i1 = random.nextInt(cnt)
+        val i2 = random.nextInt(cnt)
+        Couple(orderedCandidates(i1), orderedCandidates(i2))
+      }
+      (1 to cnt).map(_ => randomCouple)
+    }
+
+  }
+
 }
