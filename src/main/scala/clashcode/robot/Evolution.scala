@@ -7,9 +7,9 @@ import scala.collection.parallel.ForkJoinTaskSupport
 /**
  * 
  */
-class Evolution(candidateCodeFactory: CandidateCodeFactory) {
+class Evolution(initials: InitialCandidatesFactory) {
 
-  var candidates = candidateCodeFactory.createCodes.map(c => c.evaluate).toSeq
+  var candidates = initials.createCodes.map(c => c.evaluate).toSeq
   val poolSize = candidates.size
   
   var random = new Random()
@@ -106,7 +106,7 @@ class Evolution(candidateCodeFactory: CandidateCodeFactory) {
 
 }
 
-trait CandidateCodeFactory {
+trait InitialCandidatesFactory {
 
   def createCodes: Seq[CandidateCode]
 
