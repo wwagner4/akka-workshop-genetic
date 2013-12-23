@@ -92,7 +92,7 @@ trait SelectionStrategy {
   /**
    * Selects couples from a sorted sequence of candidates.
    * The candidates are sorted by their fitness. Index 0 is the fittest candidate  
-   * The number of couples should be the number of candidates
+   * The number of couples should be smaller or equal to the number of candidates
    */
   def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple]
   
@@ -102,6 +102,25 @@ trait SelectionStrategy {
 
 trait CrossoverStrategy {
   
-  def createChildren(generation: Int, couples: Seq[Couple], candidates: Seq[CandidatePoints]): Seq[CandidateCode] 
+  /**
+   *  Create the next generation of children.
+   *  To do so use one of the following techniques
+   *  - Apply crossover on any of the provided couples
+   *  - Apply mutation on any of the candidates from the previous generation
+   *  - Create new random strategies
+   *  - Use combinations of the points above
+   *  - Invent something totally new
+   *  
+   *  The number of generated children should be equal to the number of
+   *  candidates from the previous generation  
+   *  
+   *  generation:         The number of the processed generation
+   *  couples:            A set of couples created by the selection strategy out of members of 
+   *                      the previous generation
+   *  previousGeneration: The candidates from the previous generation sorted by their 
+   *                      fitness            
+   */ 
+  
+  def createChildren(generation: Int, couples: Seq[Couple], previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] 
   
 }

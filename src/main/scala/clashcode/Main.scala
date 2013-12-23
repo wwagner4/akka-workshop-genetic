@@ -17,8 +17,8 @@ object Main extends App {
 
   val ts: String = createTimestamp
 
-  //val fac: InitialCandidatesFactory = initial.RandomCandidates.defaultSize
-  val fac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
+  val fac: InitialCandidatesFactory = initial.RandomCandidates.defaultSize
+  //val fac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
   val selStrat = selection.RandomSelectionStrategy.pairwiseRandom
   
@@ -148,8 +148,8 @@ package crossover {
 
     val random = new java.util.Random
 
-    def createChildren(generation: Int, couples: Seq[Couple], candidates: Seq[CandidatePoints]): Seq[CandidateCode] = {
-      val candidateHashes: Seq[Int] = candidates.map(_.code.bits.toList.hashCode)
+    def createChildren(generation: Int, couples: Seq[Couple], previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] = {
+      val candidateHashes: Seq[Int] = previousGeneration.map(_.code.bits.toList.hashCode)
       couples.map(couple => crossover(generation, couple, candidateHashes))
     }
 
