@@ -11,6 +11,7 @@ import clashcode.robot.CandidatePoints
 import clashcode.robot.Decisions
 import clashcode.robot.GeneticOperationsStrategy
 import scala.collection.GenSeq
+import clashcode.robot.PopulationBuildingStrategy
 
 object Main extends App {
 
@@ -20,8 +21,10 @@ object Main extends App {
   //val iniFac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
   val genOpStrat = genetic.ChrisGenOpStrategy
+  
+  val popBuildStrat = genetic.ChrisPopBuildStrategy
 
-  val ev = new Evolution(iniFac, genOpStrat)
+  val ev = new Evolution(iniFac, genOpStrat, popBuildStrat)
   val start = System.currentTimeMillis
   (0 until 300).foreach {
     i =>
@@ -150,6 +153,18 @@ package genetic {
       }
       (1 to previousGeneration.size) map (_ => crossover)
     }
+
+    /**
+     * Append new members and members of the previos generation. select the fittest
+     */
+    def createNextPopulation(generation: Int, poolSize: Int, newMembers: GenSeq[CandidatePoints], previousGeneration: Seq[CandidatePoints]): Seq[CandidatePoints] = {
+      val allCandidates = previousGeneration ++ newMembers
+      allCandidates.sortBy(-_.points).take(poolSize)
+    }
+    
+  }
+
+  case object ChrisPopBuildStrategy extends PopulationBuildingStrategy {
 
     /**
      * Append new members and members of the previos generation. select the fittest
