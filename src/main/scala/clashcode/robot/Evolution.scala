@@ -18,7 +18,7 @@ class Evolution(initials: InitialCandidatesFactory, genOpStrat: GeneticOperation
   var generation = 0
   var firstDebug = true
 
-  val variCalc = new VarianceCandidatePoints()
+  val candVari = new CandidateVariance()
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
   //println(taskSupport.parallelismLevel)
@@ -64,7 +64,7 @@ class Evolution(initials: InitialCandidatesFactory, genOpStrat: GeneticOperation
     val first = candidates(0).points
     val last = candidates.last.points
     val vari = candidates.map(_.points).distinct.length / candidates.length.toDouble
-    val vari1 = variCalc.variance(candidates)
+    val vari1 = candVari.diffCount(candidates)
     println(f"$generation%5d\t$first%5d\t$last%5d\t$vari%5.3f\t$vari1%5.3f")
   }
 

@@ -5,12 +5,12 @@ package clashcode.robot
  * number of different bytes in codes when compairing
  * pairs of candidates
  */
-class VarianceCandidatePoints {
+class CandidateVariance {
 
   private val ran = new java.util.Random()
   private val sampleSize = 100
 
-  def variance(items: Seq[CandidatePoints]): Double = {
+  def diffCount(items: Seq[CandidatePoints]): Double = {
     val opts = for (i <- 1 to sampleSize) yield {
       val i1 = ran.nextInt(items.size)
       val i2 = ran.nextInt(items.size)
