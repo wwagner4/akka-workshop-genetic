@@ -36,7 +36,7 @@ class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy,
 
     // create next generation candidates
     val couples = selStrat.selectCouples(candidates)
-    val newCodes = crossStrat.createChildren(generation, couples, candidates)
+    val newCodes = crossStrat.createNewMembers(generation, couples, candidates)
     //println(s"newCodes size: ${newCodes.size}")
     
     // evaluate next generation
@@ -92,7 +92,6 @@ trait SelectionStrategy {
   /**
    * Selects couples from a sorted sequence of candidates.
    * The candidates are sorted by their fitness. Index 0 is the fittest candidate  
-   * The number of couples should be smaller or equal to the number of candidates
    */
   def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple]
   
@@ -103,16 +102,14 @@ trait SelectionStrategy {
 trait CrossoverStrategy {
   
   /**
-   *  Create the next generation of children.
+   *  Create new members of the next generation.
    *  To do so use one of the following techniques
    *  - Apply crossover on any of the provided couples
+   *  - Apply mutation on the outcome of crossover couples
    *  - Apply mutation on any of the candidates from the previous generation
-   *  - Create new random strategies
+   *  - Create new random candidates
    *  - Use combinations of the points above
    *  - Invent something totally new
-   *  
-   *  The number of generated children should be equal to the number of
-   *  candidates from the previous generation  
    *  
    *  generation:         The number of the processed generation
    *  couples:            A set of couples created by the selection strategy out of members of 
@@ -121,6 +118,6 @@ trait CrossoverStrategy {
    *                      fitness            
    */ 
   
-  def createChildren(generation: Int, couples: Seq[Couple], previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] 
+  def createNewMembers(generation: Int, couples: Seq[Couple], previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] 
   
 }
