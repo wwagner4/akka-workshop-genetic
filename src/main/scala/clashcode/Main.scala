@@ -15,10 +15,10 @@ object Main extends App {
 
   val ts: String = createTimestamp
 
-  //val InitialCandidatesFactory = initial.RandomCandidates.defaultSize
-  val fac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
+  val fac: InitialCandidatesFactory = initial.RandomCandidates.defaultSize
+  //val fac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
-  val selStrat = selection.RandomSelectionStrategy.default
+  val selStrat = selection.RandomSelectionStrategy.pairwiseRandom
 
   val ev = new Evolution(fac, selStrat)
   val start = System.currentTimeMillis
@@ -118,7 +118,7 @@ package selection {
 
   object RandomSelectionStrategy {
     
-    def default: SelectionStrategy = RandomSelectionStrategy(new java.util.Random())
+    def pairwiseRandom: SelectionStrategy = RandomSelectionStrategy(new java.util.Random())
     
   }
   
