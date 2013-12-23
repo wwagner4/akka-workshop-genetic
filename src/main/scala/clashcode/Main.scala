@@ -10,6 +10,7 @@ import clashcode.robot.InitialCandidatesFactory
 import clashcode.robot.CandidatePoints
 import clashcode.robot.Decisions
 import clashcode.robot.GeneticOperationsStrategy
+import scala.collection.GenSeq
 
 object Main extends App {
 
@@ -30,8 +31,8 @@ object Main extends App {
         save(s"best-$ts.txt", ev.candidates.head.code.bits)
       }
   }
-  val done = System.currentTimeMillis - start
-  println(done)
+  //val done = System.currentTimeMillis - start
+  //println(done)
 
   def save(name: String, array: Seq[Byte]) {
     val o = new FileOutputStream(name)
@@ -150,6 +151,14 @@ package genetic {
       (1 to previousGeneration.size) map (_ => crossover)
     }
 
+    /**
+     * Append new members and members of the previos generation. select the fittest
+     */
+    def createNextPopulation(generation: Int, poolSize: Int, newMembers: GenSeq[CandidatePoints], previousGeneration: Seq[CandidatePoints]): Seq[CandidatePoints] = {
+      val allCandidates = previousGeneration ++ newMembers
+      allCandidates.sortBy(-_.points).take(poolSize)
+    }
+    
   }
 
 }
