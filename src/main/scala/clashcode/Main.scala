@@ -7,25 +7,20 @@ import clashcode.robot.Situations
 import java.text.SimpleDateFormat
 import java.util.Date
 import clashcode.robot.InitialCandidatesFactory
-import clashcode.robot.SelectionStrategy
 import clashcode.robot.CandidatePoints
-import clashcode.robot.Couple
-import clashcode.robot.CrossoverStrategy
 import clashcode.robot.Decisions
+import clashcode.robot.GeneticOperationsStrategy
 
 object Main extends App {
 
   val ts: String = createTimestamp
 
-  val fac: InitialCandidatesFactory = initial.RandomCandidates.defaultSize
-  //val fac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
+  val iniFac: InitialCandidatesFactory = initial.RandomCandidates.defaultSize
+  //val iniFac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
-  //val selStrat = selection.RandomSelectionStrategy.pairwiseRandom
-  val selStrat = selection.AlphaSelectionStrategy()
+  val genOpStrat = genetic.ChrisGenOpStrategy()
 
-  val crossStrat = crossover.ChrisCrossoverStrategy()
-
-  val ev = new Evolution(fac, selStrat, crossStrat)
+  val ev = new Evolution(iniFac, genOpStrat)
   val start = System.currentTimeMillis
   (0 until 300).foreach {
     i =>
@@ -114,62 +109,22 @@ package initial {
 
       SomeFixedCandidates(200, codes)
     }
-
   }
-
 }
 
-package selection {
+package genetic {
 
-  object RandomSelectionStrategy {
-    def pairwiseRandom: SelectionStrategy = RandomSelectionStrategy(new java.util.Random())
-  }
-
-  case class RandomSelectionStrategy(random: java.util.Random) extends SelectionStrategy {
-
-    def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple] = {
-      val cnt = orderedCandidates.size
-      def randomCouple: Couple = {
-        val i1 = random.nextInt(cnt)
-        val i2 = random.nextInt(cnt)
-        Couple(orderedCandidates(i1), orderedCandidates(i2))
-      }
-      (1 to cnt).map(_ => randomCouple)
-    }
-
-  }
-
-  object AlphaSelectionStrategy {
-    def apply(): SelectionStrategy = RandomSelectionStrategy(new java.util.Random())
-  }
-  case class AlphaSelectionStrategy(random: java.util.Random) extends SelectionStrategy {
-
-    def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple] = {
-      val cnt = orderedCandidates.size
-      def randomCouple: Couple = {
-        val i1 = 0
-        val i2 = random.nextInt(cnt)
-        Couple(orderedCandidates(i1), orderedCandidates(i2))
-      }
-      (1 to cnt).map(_ => randomCouple)
-    }
-
-  }
-
-}
-
-package crossover {
-
-  case class ChrisCrossoverStrategy extends CrossoverStrategy {
+  case class ChrisGenOpStrategy extends GeneticOperationsStrategy {
 
     val random = new java.util.Random
 
-    def createNewMembers(generation: Int, couples: Seq[Couple], previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] = {
+    def createNewMembers(generation: Int, previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] = {
       val candidateHashes: Seq[Int] = previousGeneration.map(_.code.bits.toList.hashCode)
-      def crossover(generation: Int, couple: Couple): CandidateCode = {
+      def crossover: CandidateCode = {
 
-        val left = couple.left.code
-        val right = couple.right.code
+        // select
+        val left = previousGeneration(random.nextInt(previousGeneration.size)).code
+        val right = previousGeneration(random.nextInt(previousGeneration.size)).code
 
         // crossover
         val leftCount = random.nextInt(left.bits.length)
@@ -192,7 +147,7 @@ package crossover {
         })
         CandidateCode(result)
       }
-      couples.map(couple => crossover(generation, couple))
+      (1 to previousGeneration.size) map (_ => crossover)
     }
 
   }

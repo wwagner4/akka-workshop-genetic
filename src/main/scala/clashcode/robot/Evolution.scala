@@ -7,7 +7,7 @@ import scala.collection.parallel.ForkJoinTaskSupport
 /**
  * 
  */
-class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy, crossStrat: CrossoverStrategy) {
+class Evolution(initials: InitialCandidatesFactory, genOpStrat: GeneticOperationsStrategy) {
 
   var candidates = initials.createCodes.map(c => c.evaluate).toSeq
   val poolSize = candidates.size
@@ -35,8 +35,7 @@ class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy,
     generation += 1
 
     // create next generation candidates
-    val couples = selStrat.selectCouples(candidates)
-    val newCodes = crossStrat.createNewMembers(generation, couples, candidates)
+    val newCodes = genOpStrat.createNewMembers(generation, candidates)
     //println(s"newCodes size: ${newCodes.size}")
     
     // evaluate next generation
@@ -84,40 +83,26 @@ trait InitialCandidatesFactory {
 
 }
 
-
-case class Couple(left: CandidatePoints, right: CandidatePoints) 
-
-trait SelectionStrategy {
-  
-  /**
-   * Selects couples from a sorted sequence of candidates.
-   * The candidates are sorted by their fitness. Index 0 is the fittest candidate  
-   */
-  def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple]
-  
-  
-}
-
-
-trait CrossoverStrategy {
+/**
+ * Defines how members of the next generation are created
+ */
+trait GeneticOperationsStrategy {
   
   /**
    *  Create new members of the next generation.
-   *  To do so use one of the following techniques
-   *  - Apply crossover on any of the provided couples
-   *  - Apply mutation on the outcome of crossover couples
-   *  - Apply mutation on any of the candidates from the previous generation
-   *  - Create new random candidates
-   *  - Use combinations of the points above
-   *  - Invent something totally new
+   *  To do so perform the following steps
+   *  - Select couples of candidates to be the parents for some of the members 
+   *    of the next generation
+   *  - create new candidates by applying crossover on the selected couples
+   *  - Apply mutation on the outcome of crossing over the couples (optional)
+   *  - Apply mutation on any of the candidates from the previous generation (optional)
+   *  - Create new random candidates (optional)
    *  
    *  generation:         The number of the processed generation
-   *  couples:            A set of couples created by the selection strategy out of members of 
-   *                      the previous generation
    *  previousGeneration: The candidates from the previous generation sorted by their 
    *                      fitness            
    */ 
   
-  def createNewMembers(generation: Int, couples: Seq[Couple], previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] 
+  def createNewMembers(generation: Int, previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] 
   
 }
