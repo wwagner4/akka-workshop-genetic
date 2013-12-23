@@ -10,17 +10,21 @@ import clashcode.robot.InitialCandidatesFactory
 import clashcode.robot.SelectionStrategy
 import clashcode.robot.CandidatePoints
 import clashcode.robot.Couple
+import clashcode.robot.CrossoverStrategy
+import clashcode.robot.Decisions
 
 object Main extends App {
 
   val ts: String = createTimestamp
 
-  val fac: InitialCandidatesFactory = initial.RandomCandidates.defaultSize
-  //val fac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
+  //val fac: InitialCandidatesFactory = initial.RandomCandidates.defaultSize
+  val fac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
   val selStrat = selection.RandomSelectionStrategy.pairwiseRandom
+  
+  val crossStrat = crossover.ChrisCrossoverStrategy()
 
-  val ev = new Evolution(fac, selStrat)
+  val ev = new Evolution(fac, selStrat, crossStrat)
   val start = System.currentTimeMillis
   (0 until 300).foreach {
     i =>
@@ -117,11 +121,11 @@ package initial {
 package selection {
 
   object RandomSelectionStrategy {
-    
+
     def pairwiseRandom: SelectionStrategy = RandomSelectionStrategy(new java.util.Random())
-    
+
   }
-  
+
   case class RandomSelectionStrategy(random: java.util.Random) extends SelectionStrategy {
 
     def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple] = {
@@ -132,6 +136,49 @@ package selection {
         Couple(orderedCandidates(i1), orderedCandidates(i2))
       }
       (1 to cnt).map(_ => randomCouple)
+    }
+
+  }
+
+}
+
+package crossover {
+
+  case class ChrisCrossoverStrategy extends CrossoverStrategy {
+
+    val random = new java.util.Random
+
+    def createChildren(generation: Int, couples: Seq[Couple], candidates: Seq[CandidatePoints]): Seq[CandidateCode] = {
+      val candidateHashes: Seq[Int] = candidates.map(_.code.bits.toList.hashCode)
+      couples.map(couple => crossover(generation, couple, candidateHashes))
+    }
+
+    private def crossover(generation: Int, couple: Couple, candidateHashes: Seq[Int]): CandidateCode = {
+
+      val left = couple.left.code
+      val right = couple.right.code
+
+      // crossover
+      val leftCount = random.nextInt(left.bits.length)
+      val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
+
+      // mutate
+      val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
+      //println(mutResult)
+      val mutateCount = mutResult.toInt.max(1)
+      do {
+        for (i <- 0 until mutateCount) {
+          result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
+        }
+      } while ({
+        // keep mutating if duplicate candidate
+        val compareList = result.toList.hashCode
+        val mutate = candidateHashes.contains(compareList)
+        //if (mutate) println("keep mutating")
+        mutate
+      })
+
+      CandidateCode(result)
     }
 
   }

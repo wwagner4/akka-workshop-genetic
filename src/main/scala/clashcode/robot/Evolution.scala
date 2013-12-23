@@ -7,13 +7,12 @@ import scala.collection.parallel.ForkJoinTaskSupport
 /**
  * 
  */
-class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy) {
+class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy, crossStrat: CrossoverStrategy) {
 
   var candidates = initials.createCodes.map(c => c.evaluate).toSeq
   val poolSize = candidates.size
   
   var random = new Random()
-  var candidateHashes = candidates.map(_.code.bits.toList.hashCode)
 
   var generation = 0
   var firstDebug = true
@@ -25,35 +24,6 @@ class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy)
 
   tick()
 
-  private def crossover(couple: Couple) : CandidateCode = {
-
-    val left = couple.left.code
-    val right = couple.right.code
-
-    // crossover
-    val leftCount = random.nextInt(left.bits.length)
-    val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
-
-    // mutate
-    val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-    //println(mutResult)
-    val mutateCount = mutResult.toInt.max(1)
-    do
-    {
-      for (i <- 0 until mutateCount) {
-        result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
-      }
-    }
-    while({
-      // keep mutating if duplicate candidate
-      val compareList = result.toList.hashCode
-      val mutate = candidateHashes.contains(compareList)
-      //if (mutate) println("keep mutating")
-      mutate
-    })
-
-    CandidateCode(result)
-  }
 
   def tick(count: Int) : CandidatePoints = {
     (1 until count).foreach(_ => tick())
@@ -66,7 +36,7 @@ class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy)
 
     // create next generation candidates
     val couples = selStrat.selectCouples(candidates)
-    val newCodes = couples.map(couple => crossover(couple))
+    val newCodes = crossStrat.createChildren(generation, couples, candidates)
     //println(s"newCodes size: ${newCodes.size}")
     
     // evaluate next generation
@@ -79,7 +49,6 @@ class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy)
     val allCandidates = candidates ++ newPoints
     val bestCandidates = allCandidates.sortBy(- _.points).take(poolSize)
     candidates = bestCandidates
-    candidateHashes = bestCandidates.map(_.code.bits.toList.hashCode)
 
     bestCandidates(0) // return best candidate
   }
@@ -108,6 +77,9 @@ class Evolution(initials: InitialCandidatesFactory, selStrat: SelectionStrategy)
 
 trait InitialCandidatesFactory {
 
+  /**
+   * Creates an initial population of candidates
+   */
   def createCodes: Seq[CandidateCode]
 
 }
@@ -124,5 +96,12 @@ trait SelectionStrategy {
    */
   def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple]
   
+  
+}
+
+
+trait CrossoverStrategy {
+  
+  def createChildren(generation: Int, couples: Seq[Couple], candidates: Seq[CandidatePoints]): Seq[CandidateCode] 
   
 }
