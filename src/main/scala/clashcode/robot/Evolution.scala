@@ -8,7 +8,7 @@ import scala.collection.GenSeq
 /**
  *
  */
-class Evolution(initials: InitialCandidatesFactory, genOpStrat: GeneticOperationsStrategy) {
+class Evolution(initials: InitialCandidatesFactory, genOpStrat: GeneticOperationsStrategy, popBuildStrat: PopulationBuildingStrategy) {
 
   var candidates = initials.createCodes.map(c => c.evaluate).toSeq
   val poolSize = candidates.size
@@ -43,7 +43,7 @@ class Evolution(initials: InitialCandidatesFactory, genOpStrat: GeneticOperation
     val par = newCodes.par
     par.tasksupport = taskSupport
     val newPoints = par.map(_.evaluate)
-    candidates = genOpStrat.createNextPopulation(generation, poolSize, newPoints, candidates)
+    candidates = popBuildStrat.createNextPopulation(generation, poolSize, newPoints, candidates)
     candidates(0) // return best candidate
   }
 
@@ -100,6 +100,13 @@ trait GeneticOperationsStrategy {
    */
 
   def createNewMembers(generation: Int, previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode]
+
+}
+
+/**
+ * Defines how populations are created after new members where created and tested
+ */
+trait PopulationBuildingStrategy {
 
   /**
    * Creates the next population after new members where created and their fitness was tested
