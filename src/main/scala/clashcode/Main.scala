@@ -19,7 +19,7 @@ object Main extends App {
   val iniFac: InitialCandidatesFactory = initial.RandomCandidates.defaultSize
   //val iniFac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
-  val genOpStrat = genetic.ChrisGenOpStrategy()
+  val genOpStrat = genetic.ChrisGenOpStrategy
 
   val ev = new Evolution(iniFac, genOpStrat)
   val start = System.currentTimeMillis
@@ -115,7 +115,7 @@ package initial {
 
 package genetic {
 
-  case class ChrisGenOpStrategy extends GeneticOperationsStrategy {
+  case object ChrisGenOpStrategy extends GeneticOperationsStrategy {
 
     val random = new java.util.Random
 

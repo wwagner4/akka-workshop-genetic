@@ -1,9 +1,9 @@
 package clashcode.robot
 
 import org.scalatest.FeatureSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
-class VarianceCandidatePointsSuite extends FeatureSpec with ShouldMatchers {
+class VarianceCandidatePointsSuite extends FeatureSpec with Matchers {
 
   val filler100 = "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
   val filler24 = "012345678901234567890123"
@@ -15,22 +15,22 @@ class VarianceCandidatePointsSuite extends FeatureSpec with ShouldMatchers {
         println(s"size=${("1234" + filler).size}")
         val c1: CandidatePoints = createCandidatePoint("1234" + filler)
         val c2: CandidatePoints = createCandidatePoint("1234" + filler)
-        new VarianceCandidatePoints().variance(Seq(c1, c2))
+        new CandidateVariance().diffCount(Seq(c1, c2))
       } should equal(0.0)
     }
     scenario("Variance of two CandidatePoints that are different on one position should be about 1.0") {
       {
         val c1: CandidatePoints = createCandidatePoint("1234" + filler)
         val c2: CandidatePoints = createCandidatePoint("0234" + filler)
-        new VarianceCandidatePoints().variance(Seq(c1, c2))
-      } should equal(1.0 plusOrMinus(0.1))
+        new CandidateVariance().diffCount(Seq(c1, c2))
+      } should be(1.0 +- 0.1)
     }
     scenario("Variance of two CandidatePoints that are different on two positions should be about 2.0") {
       {
         val c1: CandidatePoints = createCandidatePoint("1234" + filler)
         val c2: CandidatePoints = createCandidatePoint("0034" + filler)
-        new VarianceCandidatePoints().variance(Seq(c1, c2))
-      } should equal(2.0 plusOrMinus(0.1))
+        new CandidateVariance().diffCount(Seq(c1, c2))
+      } should be(2.0 +- 0.1)
     }
   }
 
