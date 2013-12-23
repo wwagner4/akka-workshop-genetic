@@ -7,7 +7,7 @@ import scala.collection.parallel.ForkJoinTaskSupport
 /**
  * 
  */
-class Evolution(initials: InitialCandidatesFactory) {
+class Evolution(initials: InitialCandidatesFactory, selection: SelectionStrategy) {
 
   var candidates = initials.createCodes.map(c => c.evaluate).toSeq
   val poolSize = candidates.size
@@ -113,3 +113,16 @@ trait InitialCandidatesFactory {
 }
 
 
+case class Couple(left: CandidatePoints, right: CandidatePoints) 
+
+trait SelectionStrategy {
+  
+  /**
+   * Selects couples from a sorted sequence of candidates.
+   * The candidates are sorted by their fitness. Index 0 is the fittest candidate  
+   * The number of couples should be the number of candidates
+   */
+  def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple]
+  
+  
+}

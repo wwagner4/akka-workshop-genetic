@@ -7,6 +7,9 @@ import clashcode.robot.Situations
 import java.text.SimpleDateFormat
 import java.util.Date
 import clashcode.robot.InitialCandidatesFactory
+import clashcode.robot.SelectionStrategy
+import clashcode.robot.CandidatePoints
+import clashcode.robot.Couple
 
 object Main extends App {
 
@@ -15,7 +18,9 @@ object Main extends App {
   //val InitialCandidatesFactory = initial.RandomCandidates.defaultSize
   val fac:InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
-  val ev = new Evolution(fac)
+  val selStrat = selection.RandomSelectionStrategy()
+  
+  val ev = new Evolution(fac, selStrat)
   val start = System.currentTimeMillis
   (0 until 300).foreach {
     i =>
@@ -111,4 +116,13 @@ package initial {
 
 }
 
-
+package selection {
+  
+  case class RandomSelectionStrategy extends SelectionStrategy {
+    
+      def selectCouples(orderedCandidates: Seq[CandidatePoints]): Seq[Couple] = ???
+    
+  }
+  
+  
+}
