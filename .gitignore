@@ -64,3 +64,4 @@ runner
 *.db
 /best*.txt
 /.target
+~*
