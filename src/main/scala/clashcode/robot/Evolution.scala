@@ -8,17 +8,17 @@ import scala.collection.GenSeq
 /**
  *
  */
-class Evolution(initials: InitialCandidatesFactory, genOpStrat: GeneticOperationsStrategy, popBuildStrat: PopulationBuildingStrategy) {
+class Evolution(
+    initials: InitialCandidatesFactory, 
+    genOpStrat: GeneticOperationsStrategy, 
+    popBuildStrat: PopulationBuildingStrategy,
+    debugStrategy: DebugStrategy) {
 
   var candidates = initials.createCodes.map(c => c.evaluate).toSeq
   val poolSize = candidates.size
 
   var random = new Random()
-
   var generation = 0
-  var firstDebug = true
-
-  val candVari = new CandidateVariance()
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
   //println(taskSupport.parallelismLevel)
@@ -47,27 +47,7 @@ class Evolution(initials: InitialCandidatesFactory, genOpStrat: GeneticOperation
     candidates(0) // return best candidate
   }
 
-
-  def debug() {
-    //mutateCount < Situations.codeLength / 10
-    //if (variability < 0.05) mutateCount += 1
-
-    if (firstDebug) {
-      val gen = "gen"
-      val first = "first"
-      val last = "last"
-      val vari = "vari"
-      val vari1 = "vari1"
-      println(f"$gen%5s\t$first%5s\t$last%5s\t$vari%5s\t$vari1%5s")
-      firstDebug = false
-    }
-    val first = candidates(0).points
-    val last = candidates.last.points
-    val vari = candidates.map(_.points).distinct.length / candidates.length.toDouble
-    val vari1 = candVari.diffCount(candidates)
-    println(f"$generation%5d\t$first%5d\t$last%5d\t$vari%5.3f\t$vari1%5.3f")
-  }
-
+  def debug(): Unit = debugStrategy.debug(generation, candidates)
 }
 
 trait InitialCandidatesFactory {
@@ -115,4 +95,15 @@ trait PopulationBuildingStrategy {
    * added.
    */
   def createNextPopulation(generation: Int, poolSize: Int, newMembers: GenSeq[CandidatePoints], previousGeneration: Seq[CandidatePoints]): Seq[CandidatePoints]
+}
+
+/**
+ * Debug strategy.
+ * Defines how debugging takes place
+ */
+
+trait DebugStrategy {
+  
+  def debug(generation: Int,candidates: Seq[CandidatePoints])
+  
 }
