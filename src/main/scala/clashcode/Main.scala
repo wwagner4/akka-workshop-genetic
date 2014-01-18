@@ -34,7 +34,7 @@ object Main extends App {
     i =>
       {
         ev.tick(20)
-        ev.debug()
+        ev.debug(0)
         save(s"best-$ts.txt", ev.candidates.head.code.bits)
       }
   }

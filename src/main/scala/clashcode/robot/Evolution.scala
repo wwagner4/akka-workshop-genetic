@@ -47,7 +47,7 @@ class Evolution(
     candidates(0) // return best candidate
   }
 
-  def debug(): Unit = debugStrategy.debug(generation, candidates)
+  def debug(iteration: Int): Unit = debugStrategy.debug(iteration, generation, candidates)
 }
 
 trait InitialCandidatesFactory {
@@ -104,6 +104,6 @@ trait PopulationBuildingStrategy {
 
 trait DebugStrategy {
   
-  def debug(generation: Int,candidates: Seq[CandidatePoints])
+  def debug(iteration: Int, generation: Int,candidates: Seq[CandidatePoints])
   
 }
