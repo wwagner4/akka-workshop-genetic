@@ -1,17 +1,11 @@
 package clashcode
 
 import java.io.FileOutputStream
-import clashcode.robot.CandidateCode
-import clashcode.robot.Evolution
-import clashcode.robot.Situations
 import java.text.SimpleDateFormat
 import java.util.Date
-import clashcode.robot.InitialCandidatesFactory
-import clashcode.robot.CandidatePoints
-import clashcode.robot.Decisions
-import clashcode.robot.GeneticOperationsStrategy
 import scala.collection.GenSeq
-import clashcode.robot.PopulationBuildingStrategy
+
+import clashcode.robot._
 
 object Main extends App {
 
@@ -26,7 +20,6 @@ object Main extends App {
   //val genOpStrat = SillyGenOpStrategy_03
   val genOpStrat = SillyGenOpStrategy_04(0.1)
 
-  
   val popBuildStrat = ChrisPopBuildStrategy
 
   val ev = new Evolution(iniFac, genOpStrat, popBuildStrat)
@@ -42,273 +35,18 @@ object Main extends App {
   //val done = System.currentTimeMillis - start
   //println(done)
 
-  def save(name: String, array: Seq[Byte]) {
+  private def save(name: String, array: Seq[Byte]) {
     val o = new FileOutputStream(name)
     o.write(array.mkString.getBytes)
     o.close()
   }
 
-  def createTimestamp: String = {
+  private def createTimestamp: String = {
     val sdf = new SimpleDateFormat("yyMMdd-HHmmss")
     sdf.format(new Date())
   }
 
 }
 
-// Implementations for the InitialCandidatesFactory
-
-/**
- * Creates 'poolSize' random Candidates.
- */
-case class RandomCandidates(poolSize: Int) extends InitialCandidatesFactory {
-
-  def createCodes: Seq[CandidateCode] = {
-    (1 to poolSize).map(_ => Situations.getRandomCode)
-  }
-
-}
-
-object RandomCandidates {
-
-  /**
-   * Creates 200 random candidates
-   */
-  def defaultSize: InitialCandidatesFactory = RandomCandidates(200)
-
-}
-
-/**
- * Creates an initial population of 'poolSize' candidates. Some of them
- * are fixed ('fixedCandidates') and the rest are random candidates
- * The fixed candidates are defined by a string, where every character defines one of the
- * six possible actions
- */
-case class SomeFixedCandidates(poolSize: Int, fixedCandidates: Seq[String]) extends InitialCandidatesFactory {
-
-  def createCodes: Seq[CandidateCode] = {
-    if (fixedCandidates.size >= poolSize) {
-      fixedCandidates.take(poolSize).map(codeFromString(_))
-    } else {
-      val fixed = fixedCandidates.map(codeFromString(_))
-      val random = (1 to (poolSize - fixed.size)).map(_ => Situations.getRandomCode)
-      fixed ++ random
-    }
-  }
-
-  private def codeFromString(in: String): CandidateCode = {
-    CandidateCode(in.map(_.toString.toByte).toArray)
-  }
-
-}
-
-object SomeFixedCandidates {
-
-  /**
-   * Contains four fixed candidates that where breeded in previos sessions
-   */
-  def fourFixed01: InitialCandidatesFactory = {
-    val codes = Seq(
-      "51301322330032512311322312522423201152150530450550520250130242234444434444444454444434444434434445443443400051000030503450000004",
-      "02111252040352002511322422442522205234212001404314432514511510105404452400044140444432403434434531442544242403235544523311422344",
-      "32311322203022022011312022322233444231200100502320305542121211434444404444443551414444454444444400144340434442442444442424414144",
-      "22140342305312242310422532532534551101121534514202154423035242453423451401113222412421454444440514444444440023535310500505215104")
-
-    SomeFixedCandidates(200, codes)
-  }
-}
-
 // Implementations for GeneticOperationsStrategy
 
-case object ChrisGenOpStrategy extends GeneticOperationsStrategy {
-
-  val random = new java.util.Random
-
-  def createNewMembers(generation: Int, previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] = {
-    val candidateHashes: Seq[Int] = previousGeneration.map(_.code.bits.toList.hashCode)
-    def createNewCandidate: CandidateCode = {
-
-      // select
-      val left = previousGeneration(random.nextInt(previousGeneration.size)).code
-      val right = previousGeneration(random.nextInt(previousGeneration.size)).code
-
-      // crossover
-      val leftCount = random.nextInt(left.bits.length)
-      val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
-
-      // mutate
-      val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-      //println(mutResult)
-      val mutateCount = mutResult.toInt.max(1)
-      do {
-        for (i <- 0 until mutateCount) {
-          result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
-        }
-      } while ({
-        // keep mutating if duplicate candidate
-        val compareList = result.toList.hashCode
-        val mutate = candidateHashes.contains(compareList)
-        //if (mutate) println("keep mutating")
-        mutate
-      })
-      CandidateCode(result)
-    }
-    (1 to previousGeneration.size) map (_ => createNewCandidate)
-  }
-
-}
-
-/**
- * Based on CrisGenOpStrategy. Selects always the fittest and a random candidate.
- */
-case object SillyGenOpStrategy_01 extends GeneticOperationsStrategy {
-
-  case class LeftRight(left: CandidateCode, right: CandidateCode)
-
-  val random = new java.util.Random
-
-  def createNewMembers(generation: Int, previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] = {
-    val candidateHashes: Seq[Int] = previousGeneration.map(_.code.bits.toList.hashCode)
-    def createNewCandidate: CandidateCode = {
-
-      // select the fittest and a random candidate
-      val lr = if (random.nextBoolean())
-        LeftRight(previousGeneration(0).code,
-          previousGeneration(random.nextInt(previousGeneration.size)).code)
-      else
-        LeftRight(previousGeneration(0).code,
-          previousGeneration(random.nextInt(previousGeneration.size)).code)
-
-      // crossover
-      val leftCount = random.nextInt(lr.left.bits.length)
-      val result = (lr.left).bits.take(leftCount) ++ (lr.right).bits.drop(leftCount)
-
-      // mutate
-      val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-      //println(mutResult)
-      val mutateCount = mutResult.toInt.max(1)
-      do {
-        for (i <- 0 until mutateCount) {
-          result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
-        }
-      } while ({
-        // keep mutating if duplicate candidate
-        val compareList = result.toList.hashCode
-        val mutate = candidateHashes.contains(compareList)
-        //if (mutate) println("keep mutating")
-        mutate
-      })
-      CandidateCode(result)
-    }
-    (1 to previousGeneration.size) map (_ => createNewCandidate)
-  }
-
-}
-
-/**
- * Based on CrisGenOpStrategy. Simplified calculation of 'mutateCount'
- */
-case object SillyGenOpStrategy_02 extends GeneticOperationsStrategy {
-
-  val random = new java.util.Random
-
-  def createNewMembers(generation: Int, previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] = {
-    val candidateHashes: Seq[Int] = previousGeneration.map(_.code.bits.toList.hashCode)
-    def createNewCandidate: CandidateCode = {
-
-      // select the fittest and a random candidate
-      val left = previousGeneration(random.nextInt(previousGeneration.size)).code
-      val right = previousGeneration(random.nextInt(previousGeneration.size)).code
-
-      // crossover
-      val leftCount = random.nextInt(left.bits.length)
-      val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
-
-      val mutateCount = (Situations.codeLength * 0.01).toInt
-      do {
-        for (i <- 0 until mutateCount) {
-          result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
-        }
-      } while ({
-        // keep mutating if duplicate candidate
-        val compareList = result.toList.hashCode
-        val mutate = candidateHashes.contains(compareList)
-        //if (mutate) println("keep mutating")
-        mutate
-      })
-      CandidateCode(result)
-    }
-    (1 to previousGeneration.size) map (_ => createNewCandidate)
-  }
-}
-
-/**
- * Based on CrisGenOpStrategy. Do not check for duplicates
- */
-case object SillyGenOpStrategy_03 extends GeneticOperationsStrategy {
-
-  val random = new java.util.Random
-
-  def createNewMembers(generation: Int, previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] = {
-    def createNewCandidate: CandidateCode = {
-
-      // select
-      val left = previousGeneration(random.nextInt(previousGeneration.size)).code
-      val right = previousGeneration(random.nextInt(previousGeneration.size)).code
-
-      // crossover
-      val leftCount = random.nextInt(left.bits.length)
-      val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
-
-      // mutate
-      val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
-      //println(mutResult)
-      val mutateCount = mutResult.toInt.max(1)
-      for (i <- 0 until mutateCount) {
-        result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
-      }
-      CandidateCode(result)
-    }
-    (1 to previousGeneration.size) map (_ => createNewCandidate)
-  }
-}
-
-/**
- * Based on CrisGenOpStrategy. Do not check for duplicates
- */
-case class SillyGenOpStrategy_04(mutationRate: Double) extends GeneticOperationsStrategy {
-
-  val random = new java.util.Random
-
-  def createNewMembers(generation: Int, previousGeneration: Seq[CandidatePoints]): Seq[CandidateCode] = {
-    def createNewCandidate: CandidateCode = {
-
-      // select
-      val left = previousGeneration(random.nextInt(previousGeneration.size)).code
-      val right = previousGeneration(random.nextInt(previousGeneration.size)).code
-
-      // crossover
-      val leftCount = random.nextInt(left.bits.length)
-      val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
-
-      // mutate
-      val mutateCount = (Situations.codeLength * mutationRate).toInt
-      for (i <- 0 until mutateCount) {
-        result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
-      }
-      CandidateCode(result)
-    }
-    (1 to previousGeneration.size) map (_ => createNewCandidate)
-  }
-}
-
-case object ChrisPopBuildStrategy extends PopulationBuildingStrategy {
-
-  /**
-   * Append new members and members of the previos generation. select the fittest
-   */
-  def createNextPopulation(generation: Int, poolSize: Int, newMembers: GenSeq[CandidatePoints], previousGeneration: Seq[CandidatePoints]): Seq[CandidatePoints] = {
-    val allCandidates = previousGeneration ++ newMembers
-    allCandidates.sortBy(-_.points).take(poolSize)
-  }
-
-}
