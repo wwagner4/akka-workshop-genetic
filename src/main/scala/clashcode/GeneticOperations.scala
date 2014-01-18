@@ -41,7 +41,8 @@ case object ChrisGenOpStrategy extends GeneticOperationsStrategy {
 }
 
 /**
- * Based on CrisGenOpStrategy. Selects always the fittest and a random candidate.
+ * Based on CrisGenOpStrategy. 
+ * - Alpha selection strategy. Selects always the fittest and a random candidate.
  */
 case object SillyGenOpStrategy_01 extends GeneticOperationsStrategy {
 
@@ -88,7 +89,8 @@ case object SillyGenOpStrategy_01 extends GeneticOperationsStrategy {
 }
 
 /**
- * Based on CrisGenOpStrategy. Simplified calculation of 'mutateCount'
+ * Based on CrisGenOpStrategy. 
+ * - Simplified calculation of 'mutateCount'
  */
 case object SillyGenOpStrategy_02 extends GeneticOperationsStrategy {
 
@@ -125,7 +127,8 @@ case object SillyGenOpStrategy_02 extends GeneticOperationsStrategy {
 }
 
 /**
- * Based on CrisGenOpStrategy. Do not check for duplicates
+ * Based on CrisGenOpStrategy. 
+ * - Do not check for duplicates
  */
 case object SillyGenOpStrategy_03 extends GeneticOperationsStrategy {
 
@@ -156,7 +159,9 @@ case object SillyGenOpStrategy_03 extends GeneticOperationsStrategy {
 }
 
 /**
- * Based on CrisGenOpStrategy. Do not check for duplicates
+ * Based on CrisGenOpStrategy. 
+ * - Do not check for duplicates
+ * - Simplified mutation rate (configurable)
  */
 case class SillyGenOpStrategy_04(mutationRate: Double) extends GeneticOperationsStrategy {
 
