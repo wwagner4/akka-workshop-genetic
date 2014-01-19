@@ -130,7 +130,7 @@ case object SillyGenOpStrategy_02 extends GeneticOperationsStrategy {
  * Based on CrisGenOpStrategy. 
  * - Do not check for duplicates
  */
-case object SillyGenOpStrategy_03 extends GeneticOperationsStrategy {
+case class SillyGenOpStrategy_03(mutation: Int = 100) extends GeneticOperationsStrategy {
 
   val random = new java.util.Random
 
@@ -146,7 +146,7 @@ case object SillyGenOpStrategy_03 extends GeneticOperationsStrategy {
       val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
 
       // mutate
-      val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * 100
+      val mutResult = Math.pow(2 + (generation * Situations.codeLength) / 10000.0, -1) * mutation
       //println(mutResult)
       val mutateCount = mutResult.toInt.max(1)
       for (i <- 0 until mutateCount) {

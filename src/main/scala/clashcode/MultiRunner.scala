@@ -7,8 +7,8 @@ import java.util.Date
 
 object MultiRunner extends App {
 
-  val cntInner = 20 // Number of generations between one call of 'debug()'
-  val cntOuter = 200 // Number of repetitions of inner calls. Total number of generations is cntInner * cntOuter
+  val cntInner = 100 // Number of generations between one call of 'debug()'
+  val cntOuter = 40 // Number of repetitions of inner calls. Total number of generations is cntInner * cntOuter
   val cntIter = 5 // Number of iterations for each configuration
   
   case class Conf(id: String, genOpStrat: GeneticOperationsStrategy)
@@ -17,13 +17,19 @@ object MultiRunner extends App {
     Conf("Cris", ChrisGenOpStrategy),
     Conf("S01", SillyGenOpStrategy_01),
     Conf("S02", SillyGenOpStrategy_02),
-    Conf("S03", SillyGenOpStrategy_03),
+    Conf("S03", SillyGenOpStrategy_03()),
     Conf("S04_01", SillyGenOpStrategy_04(0.1)),
     Conf("S04_001", SillyGenOpStrategy_04(0.01)),
     Conf("S04_0001", SillyGenOpStrategy_04(0.001)),
     Conf("S04_00001", SillyGenOpStrategy_04(0.0001)))
 
-  val out = confs.par.map(c => run(c))
+  val confs_01 = List(
+    Conf("S03_10", SillyGenOpStrategy_03(10)),
+    Conf("S03_100", SillyGenOpStrategy_03(100)),
+    Conf("S03_500", SillyGenOpStrategy_03(500)),
+    Conf("S03_1000", SillyGenOpStrategy_03(1000)))
+
+  val out = confs_01.par.map(c => run(c))
 
   val buffer = new StringBuilder
   buffer.append(BufferedDebugStrategy.header)
@@ -61,7 +67,7 @@ object MultiRunner extends App {
     (1 to cntOuter).foreach(i => {
       ev.tick(cntInner)
       ev.debug(iter)
-      println(f"- ${conf.id}%20s iter:$iter%5d $i%5d / $cntOuter")
+      println(f"- ${conf.id}%20s $iter%5d / $cntIter $i%5d / $cntOuter")
     })
     println(s"finished ${conf.id}")
     debugStrategy.buffer
