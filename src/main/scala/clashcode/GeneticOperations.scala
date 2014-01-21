@@ -92,7 +92,7 @@ case object SillyGenOpStrategy_01 extends GeneticOperationsStrategy {
  * Based on CrisGenOpStrategy. 
  * - Simplified calculation of 'mutateCount'
  */
-case object SillyGenOpStrategy_02 extends GeneticOperationsStrategy {
+case class SillyGenOpStrategy_02(mutationRate: Double = 0.01) extends GeneticOperationsStrategy {
 
   val random = new java.util.Random
 
@@ -108,9 +108,10 @@ case object SillyGenOpStrategy_02 extends GeneticOperationsStrategy {
       val leftCount = random.nextInt(left.bits.length)
       val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
 
-      val mutateCount = (Situations.codeLength * 0.01).toInt
+      // Must be at least 1. Otherwise you get int an endless loop
+      val mutateCount = math.max((Situations.codeLength * mutationRate).toInt, 1)
       do {
-        for (i <- 0 until mutateCount) {
+        for (i <- 1 to mutateCount) {
           result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
         }
       } while ({

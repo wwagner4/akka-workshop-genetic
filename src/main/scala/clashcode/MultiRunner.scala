@@ -13,23 +13,53 @@ object MultiRunner extends App {
   
   case class Conf(id: String, genOpStrat: GeneticOperationsStrategy)
 
-  val confs = List(
+  // Testing how different Strategies perform
+  val confs_00 = List(
     Conf("Cris", ChrisGenOpStrategy),
     Conf("S01", SillyGenOpStrategy_01),
-    Conf("S02", SillyGenOpStrategy_02),
+    Conf("S02", SillyGenOpStrategy_02()),
     Conf("S03", SillyGenOpStrategy_03()),
     Conf("S04_01", SillyGenOpStrategy_04(0.1)),
     Conf("S04_001", SillyGenOpStrategy_04(0.01)),
     Conf("S04_0001", SillyGenOpStrategy_04(0.001)),
     Conf("S04_00001", SillyGenOpStrategy_04(0.0001)))
 
+  // Testing how different mutation rates perform. Wide range of rates
   val confs_01 = List(
     Conf("S03_10", SillyGenOpStrategy_03(10)),
     Conf("S03_100", SillyGenOpStrategy_03(100)),
     Conf("S03_500", SillyGenOpStrategy_03(500)),
     Conf("S03_1000", SillyGenOpStrategy_03(1000)))
 
-  val out = confs_01.par.map(c => run(c))
+  // Testing how different complex mutation rates perform. Wide range of rates
+  // complex means that the mutation rate changes by generation count. 
+  // It gets smaller when generation count is higher.
+  val confs_02 = List(
+    Conf("S03_80", SillyGenOpStrategy_03(80)),
+    Conf("S03_90", SillyGenOpStrategy_03(90)),
+    Conf("S03_100", SillyGenOpStrategy_03(100)),
+    Conf("S03_110", SillyGenOpStrategy_03(110)),
+    Conf("S03_120", SillyGenOpStrategy_03(120)))
+    
+  // Like 02 but with a wider range. The smaller range from 02 brought no
+  // significant differences
+  val confs_02a = List(
+    Conf("S03_80", SillyGenOpStrategy_03(10)),
+    Conf("S03_90", SillyGenOpStrategy_03(50)),
+    Conf("S03_100", SillyGenOpStrategy_03(100)),
+    Conf("S03_110", SillyGenOpStrategy_03(150)),
+    Conf("S03_120", SillyGenOpStrategy_03(200)))
+
+  // Testing the performance of different simple mutation rates.
+  // Simple mutation rate means, it does not change by generation count
+  val confs_03 = List(
+    Conf("S02_005", SillyGenOpStrategy_02(0.005)),
+    Conf("S02_01", SillyGenOpStrategy_02(0.01)),
+    Conf("S02_02", SillyGenOpStrategy_02(0.02)),
+    Conf("S02_05", SillyGenOpStrategy_02(0.05)))
+
+  // Choose a configuration list  
+  val out = confs_02a.map(c => run(c))
 
   val buffer = new StringBuilder
   buffer.append(BufferedDebugStrategy.header)
