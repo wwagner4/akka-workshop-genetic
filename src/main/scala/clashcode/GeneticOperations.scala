@@ -180,7 +180,7 @@ case class SillyGenOpStrategy_04(mutationRate: Double) extends GeneticOperations
       val result = left.bits.take(leftCount) ++ right.bits.drop(leftCount)
 
       // mutate
-      val mutateCount = (Situations.codeLength * mutationRate).toInt
+      val mutateCount = math.max((Situations.codeLength * mutationRate).toInt, 1)
       for (i <- 0 until mutateCount) {
         result(random.nextInt(result.length)) = random.nextInt(Decisions.count).toByte
       }
