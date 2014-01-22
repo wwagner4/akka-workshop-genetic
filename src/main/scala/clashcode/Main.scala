@@ -12,6 +12,11 @@ object Main extends App {
   // Create evolution
   val ev = {
 
+    val random = new java.util.Random
+    
+    val selStrat = RandomSelectionStrategy(random)
+    //val selStrat = AlphaSelectionStrategy(random)
+    
     val iniFac: InitialCandidatesFactory = RandomCandidates.defaultSize
     //val iniFac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
@@ -19,7 +24,7 @@ object Main extends App {
     //val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_01
     //val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_02
     //val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_03
-    val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_04(0.1)
+    val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_04(0.1, selStrat)
 
     val popBuildStrat: PopulationBuildingStrategy = ChrisPopBuildStrategy
 
