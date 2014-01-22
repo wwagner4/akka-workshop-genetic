@@ -67,10 +67,10 @@ object MultiRunner extends App {
   // Testing the performance of different simple mutation rates without checking for duplicates.
   // Simple mutation rate means, it does not change by generation count
   val confs_04 = List(
-    Conf("S02_005", SillyGenOpStrategy_04(0.005)),
-    Conf("S02_01", SillyGenOpStrategy_04(0.01)),
-    Conf("S02_02", SillyGenOpStrategy_04(0.02)),
-    Conf("S02_05", SillyGenOpStrategy_04(0.05)))
+    Conf("S02_005", SillyGenOpStrategy_04(0.005, selStrat)),
+    Conf("S02_01", SillyGenOpStrategy_04(0.01, selStrat)),
+    Conf("S02_02", SillyGenOpStrategy_04(0.02, selStrat)),
+    Conf("S02_05", SillyGenOpStrategy_04(0.05, selStrat)))
 
   // Choose a configuration list  
   val out = confs_04.par.map(c => run(c)) 
