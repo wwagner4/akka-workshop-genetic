@@ -71,7 +71,7 @@ object MultiRunner extends App {
     Conf("S02_02", SillyGenOpStrategy_04(0.02, selStrat)),
     Conf("S02_05", SillyGenOpStrategy_04(0.05, selStrat)))
 
-  // Test SelectionStrategies
+  // Test SelectionStrategies with Silly 04
   val confs_05 = {
     val rSelStrat = RandomSelectionStrategy(random)
     val aSelStrat = AlphaSelectionStrategy(random)
@@ -88,8 +88,25 @@ object MultiRunner extends App {
       Conf("S04_G_20", SillyGenOpStrategy_04(0.001, gSelStrat_20)))
   }
 
+  // Test SelectionStrategies with Silly 04
+  val confs_06 = {
+    val rSelStrat = RandomSelectionStrategy(random)
+    val aSelStrat = AlphaSelectionStrategy(random)
+    val agSelStrat_10 = AlphaGroupSelectionStrategy(random, 10)
+    val agSelStrat_20 = AlphaGroupSelectionStrategy(random, 20)
+    val gSelStrat_10 = GroupOfFittestSelectionStrategy(random, 10)
+    val gSelStrat_20 = GroupOfFittestSelectionStrategy(random, 20)
+    List(
+      Conf("S04_R", SillyGenOpStrategy_01(rSelStrat)),
+      Conf("S04_A", SillyGenOpStrategy_01(aSelStrat)),
+      Conf("S04_AG_10", SillyGenOpStrategy_01(agSelStrat_10)),
+      Conf("S04_AG_20", SillyGenOpStrategy_01(agSelStrat_20)),
+      Conf("S04_G_10", SillyGenOpStrategy_01(gSelStrat_10)),
+      Conf("S04_G_20", SillyGenOpStrategy_01(gSelStrat_20)))
+  }
+
   // Choose a configuration list  
-  val out = confs_05.par.map(c => run(c))
+  val out = confs_06.par.map(c => run(c))
 
   val buffer = new StringBuilder
   buffer.append(BufferedDebugStrategy.header)
