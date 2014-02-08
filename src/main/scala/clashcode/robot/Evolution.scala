@@ -18,7 +18,7 @@ class Evolution(
   val poolSize = candidates.size
 
   var random = new Random()
-  var generation = 0
+  var generation = -1
 
   val taskSupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool((Seq.empty[Int].par.tasksupport.parallelismLevel * 15) / 10))
   //println(taskSupport.parallelismLevel)

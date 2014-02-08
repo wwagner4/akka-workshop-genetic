@@ -33,6 +33,18 @@ case object StdoutDebugStrategy extends DebugStrategy {
 
 }
 
+case object CodeDebugStrategy extends DebugStrategy {
+
+  def debug(iteration: Int, generation: Int, candidates: Seq[CandidatePoints]) = {
+    val first = candidates(0)
+    println("%10d %10d %10d %s" format(iteration, generation, first.points, first.code.bits.mkString("")))		
+  }
+
+}
+
+
+
+
 case class BufferedDebugStrategy(id: String) extends DebugStrategy {
 
   private val sb = new StringBuilder()

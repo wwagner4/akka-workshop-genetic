@@ -28,7 +28,7 @@ object Main extends App {
 
     val popBuildStrat: PopulationBuildingStrategy = ChrisPopBuildStrategy
 
-    val debugStrategy: DebugStrategy = StdoutDebugStrategy
+    val debugStrategy: DebugStrategy = CodeDebugStrategy
 
     new Evolution(iniFac, genOpStrat, popBuildStrat, debugStrategy)
   }
