@@ -20,11 +20,11 @@ object Main extends App {
     val iniFac: InitialCandidatesFactory = RandomCandidates.defaultSize
     //val iniFac: InitialCandidatesFactory = initial.SomeFixedCandidates.fourFixed01
 
-    //val genOpStrat: GeneticOperationsStrategy = ChrisGenOpStrategy
+    val genOpStrat: GeneticOperationsStrategy = ChrisGenOpStrategy(selStrat)
     //val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_01
     //val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_02
     //val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_03
-    val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_04(0.1, selStrat)
+    //val genOpStrat: GeneticOperationsStrategy = SillyGenOpStrategy_04(0.1, selStrat)
 
     val popBuildStrat: PopulationBuildingStrategy = ChrisPopBuildStrategy
 
